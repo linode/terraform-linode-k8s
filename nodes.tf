@@ -1,41 +1,56 @@
-resource "scaleway_ip" "k8s_node_ip" {
-  count = "${var.nodes}"
-}
+resource "linode_instance" "k8s_node" {
+  count  = "${var.nodes}"
+  region = "${var.region}"
+  label  = "${terraform.workspace}-node-${count.index + 1}"
+  group  = "${var.linode_group}"
+  type   = "${var.server_type_node}"
 
-resource "scaleway_server" "k8s_node" {
-  count          = "${var.nodes}"
-  name           = "${terraform.workspace}-node-${count.index + 1}"
-  image          = "${data.scaleway_image.xenial.id}"
-  type           = "${var.server_type_node}"
-  public_ip      = "${element(scaleway_ip.k8s_node_ip.*.ip, count.index)}"
-  security_group = "${scaleway_security_group.node_security_group.id}"
+  private_ip = true
 
-  //  volume {
-  //    size_in_gb = 50
-  //    type       = "l_ssd"
-  //  }
+  disk {
+    label           = "boot"
+    size            = 81920
+    authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
+    root_pass       = "${random_string.password.result}"
+    image           = "linode/ubuntu16.04lts"
+  }
+
+  config {
+    label  = "node"
+    kernel = "linode/grub2"
+
+    devices {
+      sda = {
+        disk_label = "boot"
+      }
+    }
+  }
 
   connection {
     type        = "ssh"
     user        = "root"
-    private_key = "${file(var.private_key)}"
+    private_key = "${file(var.ssh_private_keys)}"
   }
+
   provisioner "file" {
     source      = "scripts/docker-install.sh"
     destination = "/tmp/docker-install.sh"
   }
+
   provisioner "file" {
     source      = "scripts/kubeadm-install.sh"
     destination = "/tmp/kubeadm-install.sh"
   }
+
   provisioner "remote-exec" {
     inline = [
       "set -e",
-      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
-      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh",
-      "${data.external.kubeadm_join.result.command}",
+      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version} | tee /tmp/docker-install.log",
+      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version} | tee /tmp/kubeadm-install.log",
+      "${data.external.kubeadm_join.result.command} | tee /tmp/kubeadm-join.log",
     ]
   }
+
   provisioner "remote-exec" {
     inline = [
       "kubectl get pods --all-namespaces",
@@ -46,7 +61,7 @@ resource "scaleway_server" "k8s_node" {
     connection {
       type = "ssh"
       user = "root"
-      host = "${scaleway_ip.k8s_master_ip.0.ip}"
+      host = "${linode_instance.k8s_master_ip.0.ipv4}"
     }
   }
 }

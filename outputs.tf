@@ -1,5 +1,5 @@
 output "k8s_master_public_ip" {
-  value = "${scaleway_ip.k8s_master_ip.0.ip}"
+  value = "${linode_instance.k8s_master.0.ip_address}"
 }
 
 output "kubeadm_join_command" {
@@ -7,7 +7,7 @@ output "kubeadm_join_command" {
 }
 
 output "nodes_public_ip" {
-  value = "${concat(scaleway_server.k8s_node.*.name, scaleway_server.k8s_node.*.public_ip)}"
+  value = "${concat(linode_instance.k8s_node.*.label, linode_instance.k8s_node.*.ip_address)}"
 }
 
 output "kubectl_config" {
