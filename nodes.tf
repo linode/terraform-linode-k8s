@@ -50,6 +50,7 @@ resource "linode_instance" "k8s_node" {
   provisioner "remote-exec" {
     inline = [
       "set -e",
+      "hostnamectl set-hostname ${self.label} && hostname -F /etc/hostname",
       "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
       "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
       "${data.external.kubeadm_join.result.command}",

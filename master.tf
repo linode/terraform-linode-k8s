@@ -51,6 +51,7 @@ resource "linode_instance" "k8s_master" {
     # TODO advertise on public adress
     inline = [
       "set -e",
+      "hostnamectl set-hostname ${self.label} && hostname -F /etc/hostname",
       "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
       "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
       "kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address}",
