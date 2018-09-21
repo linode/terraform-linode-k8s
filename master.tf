@@ -48,13 +48,13 @@ resource "linode_instance" "k8s_master" {
     # TODO advertise on public adress
     inline = [
       "set -e",
-      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version} | tee /tmp/docker-install.log",
-      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version} | tee /tmp/kubeadm-install.log",
-      "kubeadm init --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address} | tee /tmp/kubeadm-install.log",
-      "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config | tee /tmp/kubectl-config.log",
-      "kubectl create secret -n kube-system generic weave-passwd --from-literal=weave-passwd=${var.weave_passwd} | tee /tmp/network-config.log",
+      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version} 2>&1 | tee /tmp/docker-install.log",
+      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version} 2>&1 | tee /tmp/kubeadm-install.log",
+      "kubeadm init --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address} 2>&1 | tee /tmp/kubeadm-install.log",
+      "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 2>&1 | tee /tmp/kubectl-config.log",
+      "kubectl create secret -n kube-system generic weave-passwd --from-literal=weave-passwd=${var.weave_passwd} 2>&1 | tee /tmp/network-config.log",
       "kubectl apply -f \"https://cloud.weave.works/k8s/net?password-secret=weave-passwd&k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
-      "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh ${var.arch} | tee /tmp/monitoring-install.log",
+      "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh ${var.arch} 2>&1 | tee /tmp/monitoring-install.log",
     ]
   }
   provisioner "local-exec" {
