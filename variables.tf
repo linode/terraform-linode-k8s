@@ -31,7 +31,7 @@ variable "server_type_master" {
 }
 
 variable "server_type_node" {
-  default     = "g6-standard-1"
+  default     = "g6-standard-2"
   description = ""
 }
 

@@ -31,11 +31,6 @@ resource "linode_instance" "k8s_master" {
   //    type       = "l_ssd"
   //  }
 
-  connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = "${file(var.ssh_private_key)}"
-  }
   provisioner file {
     source      = "config/sshd_config"
     destination = "/etc/ssh/sshd_config"

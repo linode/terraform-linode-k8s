@@ -26,11 +26,6 @@ resource "linode_instance" "k8s_node" {
     }
   }
 
-  connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = "${file(var.ssh_private_keys)}"
-  }
 
   provisioner "file" {
     source      = "scripts/docker-install.sh"
@@ -61,7 +56,7 @@ resource "linode_instance" "k8s_node" {
     connection {
       type = "ssh"
       user = "root"
-      host = "${linode_instance.k8s_master_ip.0.ipv4}"
+      host = "${linode_instance.k8s_master_ip.0.ip_address}"
     }
   }
 }
