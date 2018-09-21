@@ -56,7 +56,7 @@ resource "linode_instance" "k8s_node" {
     connection {
       type = "ssh"
       user = "root"
-      host = "${linode_instance.k8s_master_ip.0.ip_address}"
+      host = "${linode_instance.k8s_master.0.ip_address}"
     }
   }
 }
