@@ -76,7 +76,7 @@ data "external" "kubeadm_join" {
   program = ["./scripts/kubeadm-token.sh"]
 
   query = {
-    host = "${linode_instance.k8s_master.0.private_ip_address}"
+    host = "${linode_instance.k8s_master.0.ip_address}"
   }
 
   depends_on = ["linode_instance.k8s_master"]
