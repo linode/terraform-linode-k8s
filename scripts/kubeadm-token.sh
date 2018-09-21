@@ -6,7 +6,7 @@ set -e
 eval "$(jq -r '@sh "HOST=\(.host)"')"
 
 # Fetch the join command
-CMD=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+CMD=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     root@$HOST kubeadm token create --print-join-command)
 
 # Produce a JSON object containing the join command
