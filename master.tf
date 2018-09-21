@@ -36,6 +36,15 @@ resource "linode_instance" "k8s_master" {
     user        = "root"
     private_key = "${file(var.ssh_private_key)}"
   }
+  provisioner file {
+    source      = "config/sshd_config"
+    destination = "/etc/ssh/sshd_config"
+  }
+  provisioner remote-exec {
+    inline = [
+      "systemctl restart sshd",
+    ]
+  }
   provisioner "file" {
     source      = "scripts/"
     destination = "/tmp"
@@ -48,11 +57,11 @@ resource "linode_instance" "k8s_master" {
     # TODO advertise on public adress
     inline = [
       "set -e",
-      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version} 2>&1 | tee /tmp/docker-install.log",
-      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version} 2>&1 | tee /tmp/kubeadm-install.log",
-      "kubeadm init --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address} 2>&1 | tee /tmp/kubeadm-install.log",
-      "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 2>&1 | tee /tmp/kubectl-config.log",
-      "kubectl create secret -n kube-system generic weave-passwd --from-literal=weave-passwd=${var.weave_passwd} 2>&1 | tee /tmp/network-config.log",
+      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
+      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
+      "kubeadm init --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address}",
+      "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config",
+      "kubectl create secret -n kube-system generic weave-passwd --from-literal=weave-passwd=${var.weave_passwd}",
       "kubectl apply -f \"https://cloud.weave.works/k8s/net?password-secret=weave-passwd&k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
       "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh ${var.arch} 2>&1 | tee /tmp/monitoring-install.log",
     ]

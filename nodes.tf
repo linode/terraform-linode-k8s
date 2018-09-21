@@ -45,9 +45,9 @@ resource "linode_instance" "k8s_node" {
   provisioner "remote-exec" {
     inline = [
       "set -e",
-      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version} 2>&1 | tee /tmp/docker-install.log",
-      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version} 2>&1 | tee /tmp/kubeadm-install.log",
-      "${data.external.kubeadm_join.result.command} 2>&1 | tee /tmp/kubeadm-join.log",
+      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
+      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
+      "${data.external.kubeadm_join.result.command}",
     ]
   }
 
