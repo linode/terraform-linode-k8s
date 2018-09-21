@@ -26,41 +26,40 @@ resource "linode_instance" "k8s_master" {
     }
   }
 
-  //  volume {
-  //    size_in_gb = 50
-  //    type       = "l_ssd"
-  //  }
-
   provisioner file {
     source      = "config/sshd_config"
     destination = "/etc/ssh/sshd_config"
   }
+
   provisioner remote-exec {
     inline = [
       "systemctl restart sshd",
     ]
   }
+
   provisioner "file" {
     source      = "scripts/"
     destination = "/tmp"
   }
+
   provisioner "file" {
     source      = "addons/"
     destination = "/tmp"
   }
+
   provisioner "remote-exec" {
     # TODO advertise on public adress
     inline = [
       "set -e",
       "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
       "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
-      "kubeadm init --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address}",
+      "kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address}",
       "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config",
-      "kubectl create secret -n kube-system generic weave-passwd --from-literal=weave-passwd=${var.weave_passwd}",
-      "kubectl apply -f \"https://cloud.weave.works/k8s/net?password-secret=weave-passwd&k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
+      "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml",
       "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh ${var.arch} 2>&1 | tee /tmp/monitoring-install.log",
     ]
   }
+
   provisioner "local-exec" {
     command    = "./scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address}"
     on_failure = "continue"

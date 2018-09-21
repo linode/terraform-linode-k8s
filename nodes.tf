@@ -26,6 +26,16 @@ resource "linode_instance" "k8s_node" {
     }
   }
 
+  provisioner file {
+    source      = "config/sshd_config"
+    destination = "/etc/ssh/sshd_config"
+  }
+
+  provisioner remote-exec {
+    inline = [
+      "systemctl restart sshd",
+    ]
+  }
 
   provisioner "file" {
     source      = "scripts/docker-install.sh"
