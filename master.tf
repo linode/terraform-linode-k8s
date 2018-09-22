@@ -5,33 +5,29 @@ resource "linode_instance" "k8s_master" {
   group           = "${var.linode_group}"
   type            = "${var.server_type_master}"
   private_ip      = true
-  root_pass       = "${random_string.password.result}"
-  authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
-  image           = "linode/containerlinux"
-  swap_size       = 0
 
-  # disk {
-  #   label           = "boot"
-  #   size            = 81920
-  #   authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
-  #   root_pass       = "${random_string.password.result}"
-  #   image           = "linode/containerlinux"
-  # }
+  disk {
+     label           = "boot"
+     size            = 81920
+     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
+     root_pass       = "${random_string.password.result}"
+     image           = "linode/containerlinux"
+}
 
 
-  # config {
-  #   label = "master"
+  config {
+    label = "master"
 
 
-  #   // kernel = "linode/grub2"
+    kernel = "linode/direct-disk"
 
 
-  #   devices {
-  #     sda = {
-  #       disk_label = "boot"
-  #     }
-  #   }
-  # }
+    devices {
+      sda = {
+        disk_label = "boot"
+      }
+    }
+  }
 
   provisioner "file" {
     source      = "scripts/"
