@@ -5,16 +5,17 @@
 #   group  = "${var.linode_group}"
 #   type   = "${var.server_type_node}"
 #   private_ip = true
+
 #   disk {
 #     label           = "boot"
 #     size            = 81920
 #     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
 #     root_pass       = "${random_string.password.result}"
-#     image           = "linode/ubuntu16.04lts"
+#     image           = "linode/containerlinux"
 #   }
 #   config {
 #     label  = "node"
-#     kernel = "linode/grub2"
+#     kernel = "linode/direct-disk"
 #     devices {
 #       sda = {
 #         disk_label = "boot"
@@ -41,7 +42,7 @@
 #   provisioner "remote-exec" {
 #     inline = [
 #       "set -e",
-#       "hostnamectl set-hostname ${self.label} && hostname -F /etc/hostname",
+#       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
 #       "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
 #       "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
 #       "${data.external.kubeadm_join.result.command}",

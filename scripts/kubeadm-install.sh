@@ -5,7 +5,6 @@ K8S_VERSION=$1
 CNI_VERSION=$2
 HOSTNAME=$3
 
-hostnamectl set-hostname ${HOSTNAME} && sudo hostname -F /etc/hostname
 systemctl stop update-engine
 
 systemctl enable docker
