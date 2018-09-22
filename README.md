@@ -1,50 +1,48 @@
-# k8s-scw-baremetal
+# k8s-linode-terraform
 
-Kubernetes Terraform installer for Scaleway bare-metal ARM and AMD64
+Kubernetes Terraform installer for Linode Instances
 
 ### Initial setup
 
 Clone the repository and install the dependencies:
 
 ```bash
-$ git clone https://github.com/stefanprodan/k8s-scw-baremetal.git
-$ cd k8s-scw-baremetal
+$ git clone https://github.com/cliedeman/k8s-linode-terraform.git
+$ cd k8s-linode-terraform
 $ terraform init
 ```
 
 Note that you'll need Terraform v0.10 or newer to run this project.
 
-Before running the project you'll have to create an access token for Terraform to connect to the Scaleway API.
+Before running the project you'll have to create an access token for Terraform to connect to the Linode API.
 Using the token and your access key, create two environment variables:
 
 ```bash
-$ export SCALEWAY_ORGANIZATION="<ACCESS-KEY>"
-$ export SCALEWAY_TOKEN="<ACCESS-TOKEN>"
+$ export LINODE_TOKEN="<PERSONAL-ACCESS-TOKEN>"
 ```
 
 To configure your cluster, you'll need to have `jq` installed on your computer.
 
 ### Usage
 
-Create an AMD64 bare-metal Kubernetes cluster with one master and a node:
+Create an Linode Kubernetes cluster with one master and a node:
 
 ```bash
-$ terraform workspace new amd64
+$ terraform workspace new linode
 
 $ terraform apply \
- -var region=par1 \
+ -var region=eu-west \
  -var arch=x86_64 \
- -var server_type=C2S \
+ -var server_type_master=g6-standard-2 \
  -var nodes=1 \
- -var server_type_node=C2S \
+ -var server_type_node=g6-standard-2 \
  -var weave_passwd=ChangeMe \
  -var docker_version=17.12.0~ce-0~ubuntu
 ```
 
 This will do the following:
 
-* reserves public IPs for each server
-* provisions three bare-metal servers with Ubuntu 16.04.1 LTS (the size of the `master` and the `node` may be different but must remain in the same type of architecture)
+* provisions three Linode Instances with Ubuntu 16.04 LTS (the Linode instance type/size of the `master` and the `node` may be different)
 * connects to the master server via SSH and installs Docker CE and kubeadm apt packages
 * runs kubeadm init on the master server and configures kubectl
 * downloads the kubectl admin config file on your local machine and replaces the private IP with the public one
@@ -67,27 +65,12 @@ Tear down the whole infrastructure with:
 terraform destroy -force
 ```
 
-Create an ARMv7 bare-metal Kubernetes cluster with one master and two nodes:
-
-```bash
-$ terraform workspace new arm
-
-$ terraform apply \
- -var region=par1 \
- -var arch=arm \
- -var server_type=C1 \
- -var nodes=1 \
- -var server_type_node=C1 \
- -var weave_passwd=ChangeMe \
- -var docker_version=17.03.0~ce-0~ubuntu-xenial
-```
-
 ### Remote control
 
 After applying the Terraform plan you'll see several output variables like the master public IP,
 the kubeadmn join command and the current workspace admin config.
 
-In order to run `kubectl` commands against the Scaleway cluster you can use the `kubectl_config` output variable:
+In order to run `kubectl` commands against the Linode cluster you can use the `kubectl_config` output variable:
 
 Check if Heapster works:
 
@@ -96,12 +79,12 @@ $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
   top nodes
 
 NAME           CPU(cores)   CPU%      MEMORY(bytes)   MEMORY%
-arm-master-1   655m         16%       873Mi           45%
-arm-node-1     147m         3%        618Mi           32%
-arm-node-2     101m         2%        584Mi           30%
+default-master-1   655m         16%       873Mi           45%
+default-node-1     147m         3%        618Mi           32%
+default-node-2     101m         2%        584Mi           30%
 ```
 
-The `kubectl` config file format is `<WORKSPACE>.conf` as in `arm.conf` or `amd64.conf`.
+The `kubectl` config file format is `<WORKSPACE>.conf` as in `linode.conf`.
 
 In order to access the dashboard you can use port forward:
 
@@ -112,13 +95,13 @@ $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
 
 Now you can access the dashboard on your computer at `http://localhost:8888`.
 
-![Overview](https://github.com/stefanprodan/k8s-scw-baremetal/blob/master/screens/dash-overview.png)
+![Overview](https://github.com/cliedeman/k8s-linode-terraform/blob/master/screens/dash-overview.png)
 
-![Nodes](https://github.com/stefanprodan/k8s-scw-baremetal/blob/master/screens/dash-nodes.png)
+![Nodes](https://github.com/cliedeman/k8s-linode-terraform/blob/master/screens/dash-nodes.png)
 
 ### Expose services outside the cluster
 
-Since we're running on bare-metal and Scaleway doesn't offer a load balancer, the easiest way to expose
+Since we're running on bare-metal and Linode doesn't offer a load balancer, the easiest way to expose
 applications outside of Kubernetes is using a NodePort service.
 
 Let's deploy the [podinfo](https://github.com/stefanprodan/k8s-podinfo) app in the default namespace.

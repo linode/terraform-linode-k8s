@@ -13,17 +13,17 @@ variable "k8s_version" {
 
 variable "region" {
   default     = "eu-west"
-  description = "Values: par1 ams1"
+  description = "Values: us-east ap-east"
 }
 
 variable "server_type_master" {
   default     = "g6-standard-2"
-  description = ""
+  description = "Values: g6-standard-2 g6-standard-4"
 }
 
 variable "server_type_node" {
   default     = "g6-standard-2"
-  description = ""
+  description = "Values: g6-standard-2 g6-standard-4"
 }
 
 variable "nodes" {
