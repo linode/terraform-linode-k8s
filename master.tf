@@ -57,7 +57,7 @@ resource "linode_instance" "k8s_master" {
       "kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address}",
       "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config",
       "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml",
-      "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh ${var.arch} 2>&1 | tee /tmp/monitoring-install.log",
+      "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh",
     ]
   }
 

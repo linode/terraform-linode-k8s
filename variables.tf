@@ -11,15 +11,6 @@ variable "k8s_version" {
   default = "stable-1.11"
 }
 
-variable "weave_passwd" {
-  default = "ChangeMe"
-}
-
-variable "arch" {
-  default     = "x86_64"
-  description = "Values: arm arm64 x86_64"
-}
-
 variable "region" {
   default     = "eu-west"
   description = "Values: par1 ams1"
