@@ -32,25 +32,22 @@ $ terraform workspace new linode
 
 $ terraform apply \
  -var region=eu-west \
- -var arch=x86_64 \
  -var server_type_master=g6-standard-2 \
  -var nodes=1 \
  -var server_type_node=g6-standard-2 \
- -var weave_passwd=ChangeMe \
  -var docker_version=17.12.0~ce-0~ubuntu
 ```
 
 This will do the following:
 
-* provisions three Linode Instances with Ubuntu 16.04 LTS (the Linode instance type/size of the `master` and the `node` may be different)
-* connects to the master server via SSH and installs Docker CE and kubeadm apt packages
-* runs kubeadm init on the master server and configures kubectl
-* downloads the kubectl admin config file on your local machine and replaces the private IP with the public one
-* creates a Kubernetes secret with the Weave Net password
-* installs Weave Net with encrypted overlay
-* installs cluster add-ons (Kubernetes dashboard, metrics server and Heapster)
-* starts the nodes in parallel and installs Docker CE and kubeadm
-* joins the nodes in the cluster using the kubeadm token obtained from the master
+- provisions three Linode Instances with Ubuntu 16.04 LTS (the Linode instance type/size of the `master` and the `node` may be different)
+- connects to the master server via SSH and installs Docker CE and kubeadm apt packages
+- runs kubeadm init on the master server and configures kubectl
+- downloads the kubectl admin config file on your local machine and replaces the private IP with the public one
+- installs flannel network
+- installs cluster add-ons (Kubernetes dashboard, metrics server and Heapster)
+- starts the nodes in parallel and installs Docker CE and kubeadm
+- joins the nodes in the cluster using the kubeadm token obtained from the master
 
 Scale up by increasing the number of nodes:
 
@@ -105,14 +102,13 @@ Since we're running on bare-metal and Linode doesn't offer a load balancer, the 
 applications outside of Kubernetes is using a NodePort service.
 
 Let's deploy the [podinfo](https://github.com/stefanprodan/k8s-podinfo) app in the default namespace.
-Podinfo has a multi-arch Docker image and it will work on arm, arm64 or amd64.
 
 Create the podinfo nodeport service:
 
 ```bash
 $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
   apply -f https://raw.githubusercontent.com/stefanprodan/k8s-podinfo/7a8506e60fca086572f16de57f87bf5430e2df48/deploy/podinfo-svc-nodeport.yaml
- 
+
 service "podinfo-nodeport" created
 ```
 
@@ -252,14 +248,14 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      targetAverageUtilization: 80
-  - type: Resource
-    resource:
-      name: memory
-      targetAverageValue: 200Mi
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageValue: 200Mi
 ```
 
 Apply the podinfo HPA:
