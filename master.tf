@@ -50,29 +50,7 @@ resource "linode_instance" "k8s_master" {
       "set -e",
       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
       "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label}",
-    ]
-
-    connection {
-      user = "core"
-    }
-  }
-
-  provisioner "remote-exec" {
-    # TODO advertise on public adress
-    inline = [
-      "set -e",
-      "sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${self.private_ip_address} --apiserver-cert-extra-sans=${self.ip_address} --ignore-preflight-errors=FileExisting-crictl,Service-Docker,FileContent--proc-sys-net-bridge-bridge-nf-call-iptables",
-    ]
-
-    connection {
-      user = "core"
-    }
-  }
-
-  provisioner "remote-exec" {
-    # TODO advertise on public adress
-    inline = [
-      "set -e",
+      "chmod +x /tmp/kubeadm-init.sh sudo /tmp/kubeadm-init.sh ${self.private_ip_address} ${self.ip_address}",
       "mkdir -p core/.kube && sudo cp -i /etc/kubernetes/admin.conf core/.kube/config && sudo chown core core/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
       "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml",
