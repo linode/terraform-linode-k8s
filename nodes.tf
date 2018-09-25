@@ -26,13 +26,14 @@ resource "linode_instance" "k8s_node" {
   }
 
   provisioner "file" {
-    source      = "scripts/docker-install.sh"
-    destination = "/tmp/docker-install.sh"
-  }
+    source      = "scripts/"
+    destination = "/tmp"
 
-  provisioner "file" {
-    source      = "scripts/kubeadm-install.sh"
-    destination = "/tmp/kubeadm-install.sh"
+    connection {
+      user = "core"
+
+      # host = "${self.private_ip_address}"
+    }
   }
 
   provisioner "remote-exec" {
