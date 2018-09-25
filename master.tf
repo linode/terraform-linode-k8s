@@ -48,13 +48,15 @@ resource "linode_instance" "k8s_master" {
     # TODO advertise on public adress
     inline = [
       "set -e",
+      "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
       "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label}",
-      "chmod +x /tmp/kubeadm-init.sh sudo /tmp/kubeadm-init.sh ${self.private_ip_address} ${self.ip_address}",
-      "mkdir -p core/.kube && sudo cp -i /etc/kubernetes/admin.conf core/.kube/config && sudo chown core core/.kube/config",
+      "chmod +x /tmp/kubeadm-init.sh && sudo /tmp/kubeadm-init.sh ${self.private_ip_address} ${self.ip_address}",
+      "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown core $HOME/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
       "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml",
       "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh",
+      "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
     ]
 
     connection {
