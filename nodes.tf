@@ -25,17 +25,6 @@ resource "linode_instance" "k8s_node" {
     }
   }
 
-  provisioner file {
-    source      = "config/sshd_config"
-    destination = "/etc/ssh/sshd_config"
-  }
-
-  provisioner remote-exec {
-    inline = [
-      "systemctl restart sshd",
-    ]
-  }
-
   provisioner "file" {
     source      = "scripts/docker-install.sh"
     destination = "/tmp/docker-install.sh"
@@ -55,6 +44,12 @@ resource "linode_instance" "k8s_node" {
       "${data.external.kubeadm_join.result.command}",
       "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
     ]
+
+    connection {
+      user = "core"
+
+      # host = "${self.private_ip_address}"
+    }
   }
 
   provisioner "remote-exec" {
@@ -65,8 +60,7 @@ resource "linode_instance" "k8s_node" {
     on_failure = "continue"
 
     connection {
-      type = "ssh"
-      user = "root"
+      user = "core"
       host = "${linode_instance.k8s_master.0.ip_address}"
     }
   }

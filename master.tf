@@ -61,6 +61,8 @@ resource "linode_instance" "k8s_master" {
 
     connection {
       user = "core"
+
+      # host = "${self.private_ip_address}"
     }
   }
 
