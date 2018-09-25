@@ -19,7 +19,10 @@ set +e
 # because even after a kubedm reset I can't get the pre flight errors to come back
 #
 while [  $COUNT -lt $MAX_TRIES ]; do
-   kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${NODE_PRIVATE_IP} --apiserver-cert-extra-sans=${NODE_PUBLIC_IP}
+   # TODO swap this back
+   # I think this requires the kubelet ip to also be changed
+   # kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${NODE_PRIVATE_IP} --apiserver-cert-extra-sans=${NODE_PUBLIC_IP}
+   kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=${NODE_PUBLIC_IP} --apiserver-cert-extra-sans=${NODE_PRIVATE_IP}
    if [ $? -eq 0 ];then
       exit 0
    fi

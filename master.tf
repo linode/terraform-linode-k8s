@@ -77,6 +77,7 @@ data "external" "kubeadm_join" {
   program = ["./scripts/kubeadm-token.sh"]
 
   query = {
+    # TODO: should this be private ip?
     host = "${linode_instance.k8s_master.0.ip_address}"
   }
 
