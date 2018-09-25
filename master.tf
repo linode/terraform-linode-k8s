@@ -31,9 +31,8 @@ resource "linode_instance" "k8s_master" {
     destination = "/tmp"
 
     connection {
-      user = "core"
-
-      # host = "${self.private_ip_address}"
+      user    = "core"
+      timeout = "30s"
     }
   }
 
@@ -42,9 +41,8 @@ resource "linode_instance" "k8s_master" {
     destination = "/tmp"
 
     connection {
-      user = "core"
-
-      # host = "${self.private_ip_address}"
+      user    = "core"
+      timeout = "30s"
     }
   }
 
@@ -64,14 +62,13 @@ resource "linode_instance" "k8s_master" {
     ]
 
     connection {
-      user = "core"
-
-      # host = "${self.private_ip_address}"
+      user    = "core"
+      timeout = "30s"
     }
   }
 
   provisioner "local-exec" {
-    command    = "./scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address}"
+    command    = "./scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address} ${var.ssh_public_key}"
     on_failure = "continue"
   }
 }
