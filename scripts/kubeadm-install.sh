@@ -4,6 +4,19 @@ set -o nounset -o errexit
 K8S_VERSION=$1
 # CNI_VERSION=$2
 HOSTNAME=$3
+NODE_IP=$4
+
+cat << EOF > /etc/default/kubelet
+KUBELET_EXTRA_ARGS=--node-ip=${NODE_IP}
+EOF
+
+# Disable iptables for docker as this interferes with kubernetes networking
+mkdir -p /etc/systemd/system/docker.service.d
+cat << EOF > /etc/systemd/system/docker.service.d/10-disable-iptables.conf
+[Service]
+Environment="DOCKER_OPTS=--iptables=false"
+EOF
+systemctl daemon-reload
 
 systemctl enable docker.service
 systemctl start docker.service

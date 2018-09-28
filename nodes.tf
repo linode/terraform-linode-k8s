@@ -39,8 +39,9 @@ resource "linode_instance" "k8s_node" {
     inline = [
       "set -e",
       "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
+      "chmod +x /tmp/node-iptables.sh && sudo /tmp/node-iptables.sh",
       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
-      "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label}",
+      "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${self.private_ip_address}",
       "export PATH=$${PATH}:/opt/bin",
       "sudo ${data.external.kubeadm_join.result.command}",
       "chmod +x /tmp/end.sh && sudo /tmp/end.sh",

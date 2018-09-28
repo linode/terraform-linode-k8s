@@ -8,10 +8,6 @@ variable "cni_version" {
   description = "Container Network Plugin Version"
 }
 
-variable "kubeadm_version" {
-  default = "1.11.3-00"
-}
-
 variable "k8s_version" {
   default = "v1.11.3"
 }
