@@ -5,7 +5,11 @@ K8S_VERSION=$1
 # CNI_VERSION=$2
 HOSTNAME=$3
 
-systemctl enable docker
+systemctl enable docker.service
+systemctl start docker.service
+
+# Populate /proc/sys/net/bridge/bridge-nf-call-iptables
+modprobe br_netfilter
 
 CNI_VERSION="v0.6.0"
 mkdir -p /opt/cni/bin
@@ -24,4 +28,5 @@ curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${K8S_VERSION
 mkdir -p /etc/systemd/system/kubelet.service.d
 curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${K8S_VERSION}/build/debs/10-kubeadm.conf" | sed "s:/usr/bin:/opt/bin:g" > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
-systemctl enable kubelet && systemctl start kubelet
+systemctl enable kubelet.service
+systemctl start kubelet.service
