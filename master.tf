@@ -54,7 +54,7 @@ resource "linode_instance" "k8s_master" {
       "chmod +x /tmp/master-iptables.sh && sudo /tmp/master-iptables.sh",
       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
       "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${self.ip_address}",
-      "chmod +x /tmp/kubeadm-init.sh && sudo /tmp/kubeadm-init.sh ${self.private_ip_address} ${self.ip_address}",
+      "chmod +x /tmp/kubeadm-init.sh && sudo /tmp/kubeadm-init.sh ${self.ip_address} ${self.private_ip_address}",
       "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown core $HOME/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
       "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml",
@@ -78,7 +78,6 @@ data "external" "kubeadm_join" {
   program = ["./scripts/kubeadm-token.sh"]
 
   query = {
-    # TODO: should this be private ip?
     host = "${linode_instance.k8s_master.0.ip_address}"
   }
 
