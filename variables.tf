@@ -3,12 +3,13 @@ variable "docker_version" {
   description = "Use 17.12.0~ce-0~ubuntu for x86_64 and 17.03.0~ce-0~ubuntu-xenial for arm"
 }
 
-variable "kubeadm_version" {
-  default = "1.11.3-00"
+variable "cni_version" {
+  default     = "v0.7.1"
+  description = "Container Network Plugin Version"
 }
 
 variable "k8s_version" {
-  default = "stable-1.11"
+  default = "v1.11.3"
 }
 
 variable "region" {

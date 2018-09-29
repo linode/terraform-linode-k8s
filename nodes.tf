@@ -1,10 +1,9 @@
 resource "linode_instance" "k8s_node" {
-  count  = "${var.nodes}"
-  region = "${var.region}"
-  label  = "${terraform.workspace}-node-${count.index + 1}"
-  group  = "${var.linode_group}"
-  type   = "${var.server_type_node}"
-
+  count      = "${var.nodes}"
+  region     = "${var.region}"
+  label      = "${terraform.workspace}-node-${count.index + 1}"
+  group      = "${var.linode_group}"
+  type       = "${var.server_type_node}"
   private_ip = true
 
   disk {
@@ -12,12 +11,12 @@ resource "linode_instance" "k8s_node" {
     size            = 81920
     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
     root_pass       = "${random_string.password.result}"
-    image           = "linode/ubuntu16.04lts"
+    image           = "linode/containerlinux"
   }
 
   config {
     label  = "node"
-    kernel = "linode/grub2"
+    kernel = "linode/direct-disk"
 
     devices {
       sda = {
@@ -26,35 +25,32 @@ resource "linode_instance" "k8s_node" {
     }
   }
 
-  provisioner file {
-    source      = "config/sshd_config"
-    destination = "/etc/ssh/sshd_config"
-  }
-
-  provisioner remote-exec {
-    inline = [
-      "systemctl restart sshd",
-    ]
-  }
-
   provisioner "file" {
-    source      = "scripts/docker-install.sh"
-    destination = "/tmp/docker-install.sh"
-  }
+    source      = "scripts/"
+    destination = "/tmp"
 
-  provisioner "file" {
-    source      = "scripts/kubeadm-install.sh"
-    destination = "/tmp/kubeadm-install.sh"
+    connection {
+      user    = "core"
+      timeout = "30s"
+    }
   }
 
   provisioner "remote-exec" {
     inline = [
       "set -e",
-      "hostnamectl set-hostname ${self.label} && hostname -F /etc/hostname",
-      "chmod +x /tmp/docker-install.sh && /tmp/docker-install.sh ${var.docker_version}",
-      "chmod +x /tmp/kubeadm-install.sh && /tmp/kubeadm-install.sh ${var.kubeadm_version}",
-      "${data.external.kubeadm_join.result.command}",
+      "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
+      "chmod +x /tmp/node-iptables.sh && sudo /tmp/node-iptables.sh",
+      "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
+      "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${self.private_ip_address}",
+      "export PATH=$${PATH}:/opt/bin",
+      "sudo ${data.external.kubeadm_join.result.command}",
+      "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
     ]
+
+    connection {
+      user    = "core"
+      timeout = "30s"
+    }
   }
 
   provisioner "remote-exec" {
@@ -65,9 +61,9 @@ resource "linode_instance" "k8s_node" {
     on_failure = "continue"
 
     connection {
-      type = "ssh"
-      user = "root"
-      host = "${linode_instance.k8s_master.0.ip_address}"
+      user    = "core"
+      timeout = "30s"
+      host    = "${linode_instance.k8s_master.0.ip_address}"
     }
   }
 }
