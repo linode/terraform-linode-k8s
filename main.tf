@@ -5,3 +5,13 @@ provider "linode" {
 provider "external" {
   version = "1.0.0"
 }
+
+resource "null_resource" "preflight-checks" {
+  # Force re-run
+  triggers {
+    key = "${uuid()}"
+  }
+  provisioner "local-exec" {
+    command    = "./scripts/local/preflight.sh"
+  }
+}
