@@ -58,6 +58,7 @@ resource "linode_instance" "k8s_master" {
       "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown core $HOME/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
       "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml",
+      "chmod +x /tmp/linode-addons.sh && /tmp/linode-addons.sh ${self.region} ${var.linode_token}",
       "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh",
       "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
     ]

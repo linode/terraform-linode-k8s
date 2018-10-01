@@ -31,6 +31,11 @@ variable "nodes" {
   default = 1
 }
 
+variable "linode_token" {
+  type        = "string"
+  description = "Linode API v4 Personal Access Token"
+}
+
 variable "linode_group" {
   default = "k8-terraform-test"
 }
