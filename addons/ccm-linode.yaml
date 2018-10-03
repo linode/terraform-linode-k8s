@@ -45,7 +45,7 @@ spec:
         value: "true"
         effect: NoSchedule
       containers:
-        - image: appscode/ccm-linode:external
+        - image: pharmer/ccm-linode:v0.1.1
           imagePullPolicy: Always
           name: ccm-linode
           args:
