@@ -38,6 +38,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: external-dns
+  namespace: kube-system
 spec:
   strategy:
     type: Recreate
