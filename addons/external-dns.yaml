@@ -32,7 +32,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: external-dns
-  namespace: default
+  namespace: kube-system
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -56,4 +56,7 @@ spec:
         # - --domain-filter=example.com # (optional) limit to only example.com domains; change to match the zone created above.
         env:
         - name: LINODE_TOKEN
-          value: "$(LINODE_TOKEN)"
+          valueFrom:
+            secretKeyRef:
+              name: linode
+              key: token
