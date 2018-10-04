@@ -52,7 +52,7 @@ proxyProtocol:
   trustedIPs: []
   # - 10.0.0.0/8
 ssl:
-  enabled: false
+  enabled: true
   enforced: false
   upstream: false
   insecureSkipVerify: false
@@ -121,7 +121,7 @@ kvprovider:
 
 
 acme:
-  enabled: false
+  enabled: true
   email: admin@example.com
   staging: true
   logging: false
@@ -146,7 +146,7 @@ acme:
   ## change. Users of this chart should strongly consider making the switch to
   ## the recommended "tls-alpn-01" (avaialbe since v1.7), dns-01 or http-01
   ## (available since v1.5) challenge.
-  challengeType: tls-sni-01
+  challengeType: tls-alpn-01
   ## Configure dnsProvider to perform domain verification using dns challenge
   ## Applicable only if using the dns-01 challenge type
   delayBeforeCheck: 0
@@ -234,21 +234,25 @@ acme:
     ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
     ##   GKE, AWS & OpenStack)
     ##
-    # storageClass: "-"
+    storageClass: "linode-block-storage"
     accessMode: ReadWriteOnce
-    size: 1Gi
+    # Minimum linode size requirement
+    size: 10Gi
     ## A manually managed Persistent Volume Claim
     ## Requires persistence.enabled: true
     ## If defined, PVC must be created manually before volume will be bound
     ##
     # existingClaim:
 dashboard:
-  enabled: false
-  domain: traefik.example.com
+  enabled: true
+  # Set via cli
+  # domain: traefik.example.com
   service: {}
     # annotations:
     #   key: value
-  ingress: {}
+  ingress: 
+    annotations:
+      kubernetes.io/ingress.class: traefik
     # annotations:
     #   key: value
     # labels:
@@ -295,7 +299,7 @@ accessLogs:
       names: {}
         # Authorization: redact
 rbac:
-  enabled: false
+  enabled: true
 ## Enable the /metrics endpoint, for now only supports prometheus
 ## set to true to enable metric collection by prometheus
 metrics:

@@ -5,7 +5,7 @@ mysqlImage: mysql:5.7.13
 xtraBackupImage: gcr.io/google-samples/xtrabackup:1.0
 
 mysqlha:
-  replicaCount: 3
+  replicaCount: 1
 
   ## Password for MySQL root user
   ##
@@ -18,8 +18,8 @@ mysqlha:
 
   ## Create a database user
   ##
-  # mysqlUser:
-  # mysqlPassword: ## Default: random 10 character string
+  mysqlUser: bn_wordpress
+  mysqlPassword: bn_wordpress
 
 
   ## Allow unauthenticated access, uncomment to enable
@@ -27,7 +27,7 @@ mysqlha:
   # mysqlAllowEmptyPassword: true
 
   ## Create database with name and grant all permissions to user on startup, if needed
-  # mysqlDatabase:
+  mysqlDatabase: bn_wordpress
 
   ## Configuration files for the master and slaves
   ##
@@ -54,7 +54,7 @@ persistence:
   ##   set, choosing the default provisioner.  (gp2 on AWS, azure-disk on
   ##   Azure, standard on GKE, AWS & OpenStack)
   ##
-  # storageClass: "-"
+  storageClass: "linode-block-storage"
   accessModes:
   - ReadWriteOnce
   size: 10Gi
