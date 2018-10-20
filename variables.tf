@@ -51,9 +51,3 @@ variable "ssh_public_key" {
   default     = "~/.ssh/id_rsa.pub"
   description = "The path to your public key"
 }
-
-resource "random_string" "password" {
-  length           = 16
-  special          = true
-  override_special = "/@\" "
-}

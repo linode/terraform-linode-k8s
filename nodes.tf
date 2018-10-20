@@ -10,7 +10,6 @@ resource "linode_instance" "k8s_node" {
     label           = "boot"
     size            = 81920
     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
-    root_pass       = "${random_string.password.result}"
     image           = "linode/containerlinux"
   }
 
