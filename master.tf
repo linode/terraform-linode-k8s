@@ -31,7 +31,7 @@ resource "linode_instance" "k8s_master" {
 
     connection {
       user    = "core"
-      timeout = "30s"
+      timeout = "300s"
     }
   }
 
@@ -41,7 +41,7 @@ resource "linode_instance" "k8s_master" {
 
     connection {
       user    = "core"
-      timeout = "30s"
+      timeout = "300s"
     }
   }
 
@@ -64,7 +64,7 @@ resource "linode_instance" "k8s_master" {
 
     connection {
       user    = "core"
-      timeout = "30s"
+      timeout = "300s"
     }
   }
 
