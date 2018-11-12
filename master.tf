@@ -69,13 +69,13 @@ resource "linode_instance" "k8s_master" {
   }
 
   provisioner "local-exec" {
-    command    = "./scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address} ${var.ssh_public_key}"
+    command    = "${path.module}/scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address} ${var.ssh_public_key}"
     on_failure = "continue"
   }
 }
 
 data "external" "kubeadm_join" {
-  program = ["./scripts/kubeadm-token.sh"]
+  program = ["${path.module}/scripts/kubeadm-token.sh"]
 
   query = {
     host = "${linode_instance.k8s_master.0.ip_address}"

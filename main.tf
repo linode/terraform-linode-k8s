@@ -12,6 +12,6 @@ resource "null_resource" "preflight-checks" {
     key = "${uuid()}"
   }
   provisioner "local-exec" {
-    command    = "./scripts/local/preflight.sh"
+    command    = "${path.module}/scripts/local/preflight.sh"
   }
 }
