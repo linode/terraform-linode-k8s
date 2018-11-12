@@ -25,7 +25,7 @@ resource "linode_instance" "k8s_node" {
   }
 
   provisioner "file" {
-    source      = "scripts/"
+    source      = "${path.module}/scripts/"
     destination = "/tmp"
 
     connection {

@@ -26,7 +26,7 @@ resource "linode_instance" "k8s_master" {
   }
 
   provisioner "file" {
-    source      = "scripts/"
+    source      = "${path.module}/scripts/"
     destination = "/tmp"
 
     connection {
@@ -36,7 +36,7 @@ resource "linode_instance" "k8s_master" {
   }
 
   provisioner "file" {
-    source      = "addons/"
+    source      = "${path.module}/addons/"
     destination = "/tmp"
 
     connection {
