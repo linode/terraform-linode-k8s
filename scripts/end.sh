@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 set -e
-systemctl start update-engine
+
+# TODO: https://github.com/coreos/container-linux-update-operator
+# systemctl start update-engine
+

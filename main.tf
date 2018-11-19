@@ -1,5 +1,6 @@
 provider "linode" {
   token = "${var.linode_token}"
+  version = "1.2.0"
 }
 
 provider "external" {

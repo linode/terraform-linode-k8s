@@ -9,7 +9,7 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default = "v1.11.3"
+  default = "v1.12.2"
 }
 
 variable "region" {

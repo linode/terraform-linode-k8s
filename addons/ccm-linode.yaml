@@ -5,12 +5,13 @@ metadata:
   namespace: kube-system
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: system:ccm-linode
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
+  # TODO: make these permissions more fine-grained
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
@@ -18,14 +19,13 @@ subjects:
   namespace: kube-system
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: ccm-linode
   labels:
     app: ccm-linode
   namespace: kube-system
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: ccm-linode
@@ -35,31 +35,50 @@ spec:
         app: ccm-linode
     spec:
       serviceAccountName: ccm-linode
+      hostNetwork: true
       nodeSelector:
+        # The CCM will only run on a Node labelled as a master, you may want to change this
         node-role.kubernetes.io/master: ""
       tolerations:
-      - key: "node-role.kubernetes.io/master"
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: node.cloudprovider.kubernetes.io/uninitialized
-        value: "true"
-        effect: NoSchedule
+        # The CCM can run on Nodes tainted as masters
+        - key: "node-role.kubernetes.io/master"
+          effect: "NoSchedule"
+        # The CCM is a "critical addon"
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+        # This taint is set on all Nodes when an external CCM is used
+        - key: node.cloudprovider.kubernetes.io/uninitialized
+          value: "true"
+          effect: NoSchedule
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
       containers:
-        - image: pharmer/ccm-linode:v0.1.1
+        - image: linode/linode-cloud-controller-manager:latest
           imagePullPolicy: Always
           name: ccm-linode
           args:
-          - up
-          - --cloud-config=/etc/kubernetes/cloud-config
           - --cloud-provider=linode
           - --v=3
           volumeMounts:
           - mountPath: /etc/kubernetes
             name: k8s
-          ports:
-            - containerPort: 9844
-              name: web
-              protocol: TCP
+          env:
+            - name: LINODE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: linode
+                  key: token
+            - name: LINODE_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: linode
+                  key: region
       volumes:
       - name: k8s
         hostPath:

@@ -1,5 +1,5 @@
 # Configuration to deploy release version of the CSI Linode
-# plugin (https://github.com/displague/csi-linode) compatible with
+# plugin (https://github.com/linode/linode-blockstorage-csi-driver) compatible with
 # Kubernetes >=v1.10
 #
 # example usage: kubectl create -f <this_file>
@@ -12,7 +12,7 @@ metadata:
   namespace: kube-system
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
-provisioner: com.linode.csi.linodebs
+provisioner: linodebs.csi.linode.com
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -37,6 +37,9 @@ rules:
     verbs: ["get", "list", "watch", "update"]
   - apiGroups: [""]
     resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csinodeinfos"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
@@ -88,7 +91,7 @@ spec:
       serviceAccount: csi-attacher
       containers:
         - name: csi-attacher
-          image: quay.io/k8scsi/csi-attacher:v0.2.0
+          image: quay.io/k8scsi/csi-attacher:v1.0.0
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -100,7 +103,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: linode-csi-plugin
-          image: displague/linode-csi-plugin:v0.0.1
+          image: linode/linode-blockstorage-csi-driver:canary
           args :
             - init
             - "--region=$(LINODE_REGION)"
@@ -163,7 +166,12 @@ rules:
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["list", "watch", "create", "update", "patch"]
-    
+#  - apiGroups: ["snapshot.storage.k8s.io"]
+#    resources: ["volumesnapshots"]
+#    verbs: ["get", "list"]
+#  - apiGroups: ["snapshot.storage.k8s.io"]
+#    resources: ["volumesnapshotcontents"]
+#    verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -210,9 +218,9 @@ spec:
       serviceAccount: csi-provisioner
       containers:
         - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v0.2.0
+          image: quay.io/k8scsi/csi-provisioner:v1.0.0
           args:
-            - "--provisioner=com.linode.csi.linodebs"
+            - "--provisioner=linodebs.csi.linode.com"
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
           env:
@@ -223,7 +231,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: linode-csi-plugin
-          image: displague/linode-csi-plugin:v0.0.1
+          image: linode/linode-blockstorage-csi-driver:canary
           args :
             - init
             - "--region=$(LINODE_REGION)"
@@ -320,13 +328,19 @@ spec:
       hostNetwork: true
       containers:
         - name: driver-registrar
-          image: quay.io/k8scsi/driver-registrar:v0.2.0
+          image: quay.io/k8scsi/driver-registrar:v1.0.0
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
+            - "--mode=node-register"
+            - "--driver-requires-attachment=true"
+            - "--pod-info-mount-version=\"v1\""
+            - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
           env:
             - name: ADDRESS
               value: /csi/csi.sock
+            - name: DRIVER_REG_SOCK_PATH
+              value: /var/lib/kubelet/plugins/linodebs.csi.linode.com/csi.sock
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -334,16 +348,15 @@ spec:
           volumeMounts:
             - name: plugin-dir
               mountPath: /csi/
-              # TODO(displague): the registrar is not implemented yet
-              # - name: registrar-socket-dir
-              #   mountPath: /var/lib/csi/sockets/
+            - name: registration-dir
+              mountPath: /registration/
         - name: csi-linodeplugin 
           securityContext:
             privileged: true
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: displague/linode-csi-plugin:v0.0.1
+          image: linode/linode-blockstorage-csi-driver:canary
           args :
             - init
             - "--region=$(LINODE_REGION)"
@@ -372,6 +385,11 @@ spec:
                   name: linode
                   key: region
           imagePullPolicy: "Always"
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
           volumeMounts:
             - name: plugin-dir
               mountPath: /csi
@@ -383,14 +401,13 @@ spec:
             - mountPath: /dev
               name: device-dir
       volumes:
-        # TODO(displague): the registar is not implemented yet
-        #- name: registrar-socket-dir
-        #  hostPath:
-        #    path: /var/lib/kubelet/device-plugins/
-        #    type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/
+            type: DirectoryOrCreate
         - name: plugin-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/com.linode.csi.linodebs
+            path: /var/lib/kubelet/plugins/linodebs.csi.linode.com
             type: DirectoryOrCreate
         - name: pods-mount-dir
           hostPath:
