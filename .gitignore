@@ -13,3 +13,6 @@
 
 # K8S
 *.conf
+
+# Logs
+*.log
