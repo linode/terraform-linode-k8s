@@ -35,7 +35,6 @@ spec:
         app: ccm-linode
     spec:
       serviceAccountName: ccm-linode
-      hostNetwork: true
       nodeSelector:
         # The CCM will only run on a Node labelled as a master, you may want to change this
         node-role.kubernetes.io/master: ""
@@ -52,12 +51,11 @@ spec:
           effect: NoSchedule
         - key: node.kubernetes.io/not-ready
           operator: Exists
-          effect: NoExecute
-          tolerationSeconds: 300
+          effect: NoSchedule
         - key: node.kubernetes.io/unreachable
           operator: Exists
-          effect: NoExecute
-          tolerationSeconds: 300
+          effect: NoSchedule
+      hostNetwork: true
       containers:
         - image: linode/linode-cloud-controller-manager:latest
           imagePullPolicy: Always
