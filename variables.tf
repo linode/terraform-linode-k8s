@@ -4,12 +4,12 @@ variable "docker_version" {
 }
 
 variable "cni_version" {
-  default     = "v0.7.1"
+  default     = "v0.6.0"
   description = "Container Network Plugin Version"
 }
 
 variable "k8s_version" {
-  default = "v1.12.2"
+  default = "v1.11.4"
 }
 
 variable "region" {
