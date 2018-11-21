@@ -2,7 +2,7 @@
 set -o nounset -o errexit
 
 K8S_VERSION=$1
-# CNI_VERSION=$2
+CNI_VERSION=$2
 HOSTNAME=$3
 NODE_IP=$4
 
@@ -26,7 +26,6 @@ systemctl start docker.service
 # Populate /proc/sys/net/bridge/bridge-nf-call-iptables
 modprobe br_netfilter
 
-CNI_VERSION="v0.6.0"
 mkdir -p /opt/cni/bin
 curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
 

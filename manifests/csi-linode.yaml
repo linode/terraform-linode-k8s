@@ -5,6 +5,93 @@
 # example usage: kubectl create -f <this_file>
 
 ---
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: csinodeinfos.csi.storage.k8s.io
+spec:
+  group: csi.storage.k8s.io
+  names:
+    kind: CSINodeInfo
+    plural: csinodeinfos
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      properties:
+        csiDrivers:
+          description: List of CSI drivers running on the node and their properties.
+          items:
+            properties:
+              driver:
+                description: The CSI driver that this object refers to.
+                type: string
+              nodeID:
+                description: The node from the driver point of view.
+                type: string
+              topologyKeys:
+                description: List of keys supported by the driver.
+                items:
+                  type: string
+                type: array
+          type: array
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: csidrivers.csi.storage.k8s.io
+spec:
+  group: csi.storage.k8s.io
+  names:
+    kind: CSIDriver
+    plural: csidrivers
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: Specification of the CSI Driver.
+          properties:
+            attachRequired:
+              description: Indicates this CSI volume driver requires an attach operation,
+                and that Kubernetes should call attach and wait for any attach operation
+                to complete before proceeding to mount.
+              type: boolean
+            podInfoOnMountVersion:
+              description: Indicates this CSI volume driver requires additional pod
+                information (like podName, podUID, etc.) during mount operations.
+              type: string
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+
+# CSIDriverRegistry feature gate needs to be enabled
+apiVersion: csi.storage.k8s.io/v1alpha1
+kind: CSIDriver
+metadata:
+  name: linodebs.csi.linode.com
+spec:
+  attachRequired: true
+  podInfoOnMountVersion: "v1"
+
+---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -17,79 +104,39 @@ provisioner: linodebs.csi.linode.com
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: csi-attacher
+  name: csi-linode-controller-sa
   namespace: kube-system
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: external-attacher-runner
-  namespace: kube-system
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["get", "list", "watch", "update"]
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "update"]
-  - apiGroups: [""]
-    resources: ["nodes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csinodeinfos"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update", "create"]
 
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: csi-attacher-role
-  namespace: kube-system
-subjects:
-  - kind: ServiceAccount
-    name: csi-attacher
-    namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: external-attacher-runner
-  apiGroup: rbac.authorization.k8s.io
----
-# needed for StatefulSet
-kind: Service
-apiVersion: v1
-metadata:
-  name: csi-attacher-linodeplugin
-  namespace: kube-system
-  labels:
-    app: csi-attacher-linodeplugin
-spec:
-  selector:
-    app: csi-attacher-linodeplugin
-  ports:
-    - name: dummy
-      port: 12345
 ---
 kind: StatefulSet
 apiVersion: apps/v1beta1
 metadata:
-  name: csi-attacher-linodeplugin
+  name: csi-linode-controller
   namespace: kube-system
 spec:
-  serviceName: "csi-attacher-linodeplugin"
+  serviceName: "csi-linode"
   replicas: 1
   template:
     metadata:
       labels:
-        app: csi-attacher-linodeplugin
+        app: csi-linode-controller
+        role: csi-linode
     spec:
-      serviceAccount: csi-attacher
+      serviceAccount: csi-linode-controller-sa
       containers:
+        - name: csi-provisioner
+          image: quay.io/k8scsi/csi-provisioner:v1.0.0
+          args:
+            - "--provisioner=linodebs.csi.linode.com"
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: "Always"
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-attacher
           image: quay.io/k8scsi/csi-attacher:v1.0.0
           args:
@@ -142,14 +189,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: csi-provisioner
+  name: csi-linode-controller-sa
   namespace: kube-system
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: external-provisioner-runner
-  namespace: kube-system
+  name: csi-linode-provisioner-role
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -159,125 +205,45 @@ rules:
     verbs: ["get", "list", "watch", "create", "delete"]
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
-    verbs: ["get", "list", "watch", "update"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["list", "watch", "create", "update", "patch"]
-#  - apiGroups: ["snapshot.storage.k8s.io"]
-#    resources: ["volumesnapshots"]
-#    verbs: ["get", "list"]
-#  - apiGroups: ["snapshot.storage.k8s.io"]
-#    resources: ["volumesnapshotcontents"]
-#    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csinodeinfos"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments"]
+    verbs: ["get", "list", "watch", "update", "create"]
+
 ---
+
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-provisioner-role
-  namespace: kube-system
+  name: csi-linode-provisioner-binding
 subjects:
   - kind: ServiceAccount
-    name: csi-provisioner
+    name: csi-linode-controller-sa
     namespace: kube-system
 roleRef:
   kind: ClusterRole
-  name: external-provisioner-runner
+  name: csi-linode-provisioner-role
   apiGroup: rbac.authorization.k8s.io
+
 ---
-# needed for StatefulSet
-kind: Service
-apiVersion: v1
-metadata:
-  name: csi-provisioner-linodeplugin
-  namespace: kube-system
-  labels:
-    app: csi-provisioner-linodeplugin
-spec:
-  selector:
-    app: csi-provisioner-linodeplugin
-  ports:
-    - name: dummy
-      port: 12345
----
-kind: StatefulSet
-apiVersion: apps/v1beta1
-metadata:
-  name: csi-provisioner-linodeplugin
-  namespace: kube-system
-spec:
-  serviceName: "csi-provisioner-linodeplugin"
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: csi-provisioner-linodeplugin
-    spec:
-      serviceAccount: csi-provisioner
-      containers:
-        - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v1.0.0
-          args:
-            - "--provisioner=linodebs.csi.linode.com"
-            - "--csi-address=$(ADDRESS)"
-            - "--v=5"
-          env:
-            - name: ADDRESS
-              value: /var/lib/csi/sockets/pluginproxy/csi.sock
-          imagePullPolicy: "Always"
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
-        - name: linode-csi-plugin
-          image: linode/linode-blockstorage-csi-driver:canary
-          args :
-            - init
-            - "--region=$(LINODE_REGION)"
-            - "--endpoint=$(CSI_ENDPOINT)"
-            - "--token=$(LINODE_TOKEN)"
-            - "--url=$(LINODE_API_URL)"
-            - "--node=$(NODE_NAME)"
-            - "--v=10"
-          env:
-            - name: CSI_ENDPOINT
-              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: LINODE_API_URL
-              value: https://api.linode.com/v4
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: LINODE_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: linode
-                  key: token
-            - name: LINODE_REGION
-              valueFrom:
-                secretKeyRef:
-                  name: linode
-                  key: region
-          imagePullPolicy: "Always"
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
-      volumes:
-        - name: socket-dir
-          emptyDir: {}
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: csi-linodeplugin
-  namespace: kube-system
----
+
+# TODO remove create, namespaces, and secrets if attacher no longer needs them
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-linodeplugin
-  namespace: kube-system
+  name: csi-linode-attacher-role
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -298,33 +264,33 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-linodeplugin
-  namespace: kube-system
+  name: csi-linode-attacher-binding
 subjects:
   - kind: ServiceAccount
-    name: csi-linodeplugin
+    name: csi-linode-controller-sa
     namespace: kube-system
 roleRef:
   kind: ClusterRole
-  name: csi-linodeplugin
+  name: csi-linode-attacher-role
   apiGroup: rbac.authorization.k8s.io          
 
 ---
 kind: DaemonSet
 apiVersion: apps/v1beta2
 metadata:
-  name: csi-linodeplugin
+  name: csi-linode-node
   namespace: kube-system
 spec:
   selector:
     matchLabels:
-      app: csi-linodeplugin
+      app: csi-linode-node
   template:
     metadata:
       labels:
-        app: csi-linodeplugin
+        app: csi-linode-node
+        role: csi-linode
     spec:
-      serviceAccount: csi-linodeplugin
+      serviceAccount: csi-linode-node-sa
       hostNetwork: true
       containers:
         - name: driver-registrar
@@ -350,12 +316,7 @@ spec:
               mountPath: /csi/
             - name: registration-dir
               mountPath: /registration/
-        - name: csi-linodeplugin 
-          securityContext:
-            privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
+        - name: csi-linode-plugin 
           image: linode/linode-blockstorage-csi-driver:canary
           args :
             - init
@@ -416,3 +377,37 @@ spec:
         - name: device-dir
           hostPath:
             path: /dev
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-linode-node-sa
+  namespace: kube-system
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-linode-driver-registrar-role
+  namespace: kube-system
+rules:
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-linode-driver-registrar-binding
+subjects:
+  - kind: ServiceAccount
+    name: csi-linode-node-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: csi-linode-driver-registrar-role
+  apiGroup: rbac.authorization.k8s.io    
