@@ -7,7 +7,7 @@ HOSTNAME=$3
 NODE_IP=$4
 
 cat << EOF > /etc/default/kubelet
-KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true"
+KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=CSINodeInfo=true,CSIDriverRegistry=true"
 EOF
 
 mkdir -p /etc/kubernetes/manifests
