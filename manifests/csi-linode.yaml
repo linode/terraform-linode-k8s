@@ -1,5 +1,6 @@
 # pkg/linode-bs/deploy/kubernetes/01-csi-nodeinfo.yaml
 # Requires CSINodeInfo feature gate (alpha in 1.12)
+# xref: https://raw.githubusercontent.com/kubernetes/csi-api/master/pkg/crd/manifests/csidriver.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -58,7 +59,7 @@ spec:
 ---
 # pkg/linode-bs/deploy/kubernetes/02-csi-driver.yaml
 # Requires CSIDriverRegistry feature gate (alpha in 1.12)
-# https://raw.githubusercontent.com/kubernetes/csi-api/master/pkg/crd/manifests/csidriver.yaml
+# xref: https://raw.githubusercontent.com/kubernetes/csi-api/master/pkg/crd/manifests/csinodeinfo.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -119,7 +120,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-node-sa
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: driver-registrar-role
@@ -173,7 +174,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-controller-sa
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: external-provisioner-role
@@ -210,7 +211,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-controller-sa
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: external-attacher-role
@@ -256,7 +257,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-controller-sa
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: external-snapshotter-role
@@ -320,6 +321,7 @@ spec:
         role: csi-linode
     spec:
       serviceAccount: csi-controller-sa
+      hostNetwork: true
       containers:
         - name: csi-provisioner
           image: quay.io/k8scsi/csi-provisioner:v1.0.0
@@ -349,8 +351,6 @@ spec:
         - name: linode-csi-plugin
           image: linode/linode-blockstorage-csi-driver:canary
           args :
-            - init
-            - "--region=$(LINODE_REGION)"
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(LINODE_TOKEN)"
             - "--url=$(LINODE_API_URL)"
@@ -370,11 +370,6 @@ spec:
                 secretKeyRef:
                   name: linode
                   key: token
-            - name: LINODE_REGION
-              valueFrom:
-                secretKeyRef:
-                  name: linode
-                  key: region
           imagePullPolicy: "Always"
           volumeMounts:
             - name: socket-dir
@@ -385,7 +380,7 @@ spec:
 ---
 # pkg/linode-bs/deploy/kubernetes/07-ds-csi-linode-node.yaml
 kind: DaemonSet
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 metadata:
   name: csi-linode-node
   namespace: kube-system
@@ -428,8 +423,6 @@ spec:
         - name: csi-linode-plugin 
           image: linode/linode-blockstorage-csi-driver:canary
           args :
-            - init
-            - "--region=$(LINODE_REGION)"
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(LINODE_TOKEN)"
             - "--url=$(LINODE_API_URL)"
@@ -449,11 +442,6 @@ spec:
                 secretKeyRef:
                   name: linode
                   key: token
-            - name: LINODE_REGION
-              valueFrom:
-                secretKeyRef:
-                  name: linode
-                  key: region
           imagePullPolicy: "Always"
           securityContext:
             privileged: true
@@ -473,8 +461,12 @@ spec:
       volumes:
         - name: registration-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/
+            path: /var/lib/kubelet/plugins_registry/
             type: DirectoryOrCreate
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
         - name: plugin-dir
           hostPath:
             path: /var/lib/kubelet/plugins/linodebs.csi.linode.com
@@ -486,4 +478,21 @@ spec:
         - name: device-dir
           hostPath:
             path: /dev
+        # The following mounts are required to trigger host udevadm from container
+        - name: udev-rules-etc
+          hostPath:
+            path: /etc/udev
+            type: Directory
+        - name: udev-rules-lib
+          hostPath:
+            path: /lib/udev
+            type: Directory
+        - name: udev-socket
+          hostPath:
+            path: /run/udev
+            type: Directory
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
 ---
