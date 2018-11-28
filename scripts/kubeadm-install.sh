@@ -5,9 +5,10 @@ K8S_VERSION=$1
 CNI_VERSION=$2
 HOSTNAME=$3
 NODE_IP=$4
+K8S_FEATURE_GATES="$5"
 
 cat << EOF > /etc/default/kubelet
-KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true"
+KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=${K8S_FEATURE_GATES}"
 EOF
 
 mkdir -p /etc/kubernetes/manifests

@@ -9,7 +9,11 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default = "v1.12.2"
+  default = "v1.13.0-beta.2"
+}
+
+variable "k8s_feature_gates" {
+  default = "CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true"
 }
 
 variable "region" {

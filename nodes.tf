@@ -40,7 +40,7 @@ resource "linode_instance" "k8s_node" {
       "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
       "chmod +x /tmp/node-iptables.sh && sudo /tmp/node-iptables.sh",
       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
-      "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${self.private_ip_address}",
+      "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${self.private_ip_address} ${var.k8s_feature_gates}",
       "export PATH=$${PATH}:/opt/bin",
       "sudo ${data.external.kubeadm_join.result.command}",
       "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
@@ -54,6 +54,7 @@ resource "linode_instance" "k8s_node" {
 
   provisioner "remote-exec" {
     inline = [
+      "export PATH=$${PATH}:/opt/bin",
       "kubectl get pods --all-namespaces",
     ]
 
