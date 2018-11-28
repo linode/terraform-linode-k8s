@@ -13,20 +13,6 @@ EOF
 
 mkdir -p /etc/kubernetes/manifests
 
-# Disable iptables for docker as this interferes with kubernetes networking
-mkdir -p /etc/systemd/system/docker.service.d
-cat << EOF > /etc/systemd/system/docker.service.d/10-disable-iptables.conf
-[Service]
-Environment="DOCKER_OPTS=--iptables=false"
-EOF
-systemctl daemon-reload
-
-systemctl enable docker.service
-systemctl start docker.service
-
-# Populate /proc/sys/net/bridge/bridge-nf-call-iptables
-modprobe br_netfilter
-
 mkdir -p /opt/cni/bin
 curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
 
