@@ -6,6 +6,8 @@ set -e
 # EXTRA_OPTS="--debug --dry-run"
 EXTRA_OPTS=""
 
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+
 helm upgrade mysql incubator/mysqlha --install ${EXTRA_OPTS} --version 0.4.0 \
   --values values/mysqlha.values.yaml
 
