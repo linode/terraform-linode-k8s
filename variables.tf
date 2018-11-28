@@ -4,12 +4,16 @@ variable "docker_version" {
 }
 
 variable "cni_version" {
-  default     = "v0.7.1"
+  default     = "v0.6.0"
   description = "Container Network Plugin Version"
 }
 
 variable "k8s_version" {
-  default = "v1.11.3"
+  default = "v1.13.0-beta.2"
+}
+
+variable "k8s_feature_gates" {
+  default = "CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true"
 }
 
 variable "region" {

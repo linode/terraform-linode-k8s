@@ -2,33 +2,21 @@
 set -o nounset -o errexit
 
 K8S_VERSION=$1
-# CNI_VERSION=$2
+CNI_VERSION=$2
 HOSTNAME=$3
 NODE_IP=$4
+K8S_FEATURE_GATES="$5"
 
 cat << EOF > /etc/default/kubelet
-KUBELET_EXTRA_ARGS=--node-ip=${NODE_IP}
+KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=${K8S_FEATURE_GATES}"
 EOF
 
-# Disable iptables for docker as this interferes with kubernetes networking
-mkdir -p /etc/systemd/system/docker.service.d
-cat << EOF > /etc/systemd/system/docker.service.d/10-disable-iptables.conf
-[Service]
-Environment="DOCKER_OPTS=--iptables=false"
-EOF
-systemctl daemon-reload
+mkdir -p /etc/kubernetes/manifests
 
-systemctl enable docker.service
-systemctl start docker.service
-
-# Populate /proc/sys/net/bridge/bridge-nf-call-iptables
-modprobe br_netfilter
-
-CNI_VERSION="v0.6.0"
 mkdir -p /opt/cni/bin
 curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
 
-CRICTL_VERSION="v1.11.1"
+CRICTL_VERSION="v1.12.0"
 mkdir -p /opt/bin
 curl -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" | tar -C /opt/bin -xz
 
