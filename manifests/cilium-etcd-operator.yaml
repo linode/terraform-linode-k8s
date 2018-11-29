@@ -155,7 +155,6 @@ rules:
 - apiGroups: ["extensions"]
   resources: ["deployments"]
   verbs: ["create", "get","list","patch","update"]
-# The following permissions can be removed if not using S3 backup and TLS
 - apiGroups:
   - ""
   resources:
