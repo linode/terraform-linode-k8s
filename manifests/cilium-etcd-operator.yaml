@@ -13,6 +13,23 @@ spec:
     spec:
       serviceAccountName: cilium-etcd-operator
       hostNetwork: true
+      tolerations:
+      # The CCM can run on Nodes tainted as masters
+      - key: "node-role.kubernetes.io/master"
+        effect: "NoSchedule"
+      # The CCM is a "critical addon"
+      - key: "CriticalAddonsOnly"
+        operator: "Exists"
+      # This taint is set on all Nodes when an external CCM is used
+      - key: node.cloudprovider.kubernetes.io/uninitialized
+        value: "true"
+        effect: NoSchedule
+      - key: node.kubernetes.io/not-ready
+        operator: Exists
+        effect: NoSchedule
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
+        effect: NoSchedule
       containers:
       - name: cilium-etcd-operator
         image: docker.io/cilium/cilium-etcd-operator:v2.0.0
