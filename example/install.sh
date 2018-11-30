@@ -13,7 +13,6 @@ helm upgrade mysql incubator/mysqlha --install ${EXTRA_OPTS} --version 0.4.0 \
 
 helm upgrade wordpress stable/wordpress --install ${EXTRA_OPTS} --version 3.0.2  \
   --values values/wordpress.values.yaml \
-  --set service.annotations."external-dns\.alpha\.kubernetes\.io/hostname"="wordpress.${DOMAIN}" \
   --set ingress.hosts[0].name="wordpress.${DOMAIN}"
 
 helm upgrade traefik stable/traefik --install ${EXTRA_OPTS} --version 1.54.0 \
