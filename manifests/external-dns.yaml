@@ -55,10 +55,13 @@ spec:
       - name: external-dns
         image: registry.opensource.zalan.do/teapot/external-dns:latest
         args:
-        - --source=service # ingress is also possible
         - --provider=linode
         # - --domain-filter=example.com # (optional) limit to only example.com domains; change to match the zone created above.
         env:
+        - name: EXTERNAL_DNS_SOURCE
+          value: |-
+            service
+            ingress
         - name: LINODE_TOKEN
           valueFrom:
             secretKeyRef:
