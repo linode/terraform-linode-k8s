@@ -55,7 +55,7 @@ resource "linode_instance" "k8s_master" {
       "chmod +x /tmp/kubeadm-init.sh && sudo /tmp/kubeadm-init.sh ${terraform.workspace} ${var.k8s_version} ${self.ip_address} ${self.private_ip_address} ${var.k8s_feature_gates}",
       "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown core $HOME/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
-      "kubectl apply -f /tmp/calico.yaml",
+      "kubectl apply -f /tmp/cilium-etcd-operator.yaml && kubectl apply -f /tmp/cilium.yaml",
       "chmod +x /tmp/linode-addons.sh && /tmp/linode-addons.sh ${self.region} ${var.linode_token}",
       "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh",
       "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
