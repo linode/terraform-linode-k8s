@@ -6,9 +6,11 @@ This directory contains simple helm scripts to confirm the the various Linode Ad
 
 ### [**Linode Cloud Controller Manager (CCM)**](https://github.com/linode/linode-cloud-controller-manager)
 
-The CCM annotates new Kubernetes Nodes with Linode specific details, including the LinodeID and instance type.  The CCM monitors the Linode API and will remove a Kubernetes Node if it finds the Linode has been deleted.
+A primary function of the CCM is to register and maintain Kubernetes `LoadBalancer` settings within a Linode [`NodeBalancer`](https://www.linode.com/nodebalancers).  This is needed to allow traffic from the Internet into the cluster in the most fault tollerant way (obviously very important!)
 
-Another primary function of the CCM is to register and maintain Kubernetes `LoadBalancer` settings within a Linode [`NodeBalancer`](https://www.linode.com/nodebalancers).  When a service type is set to `LoadBalancer`, a `NodeBalancer` will be provisioned with a `NodeBalancer Config` for each service port, and `NodeBalancer Node` entries for each Kubernetes `Endpoint` providing that service.
+The CCM also annotates new Kubernetes Nodes with Linode specific details, including the LinodeID and instance type.  Linode hostnames and network addresses are automatically associated with their corresponding Kubernetes resources, forming the basis for a variety of Kubernetes features.  T
+
+The CCM monitors the Linode API for changes in the Linode instance and will remove a Kubernetes Node if it finds the Linode has been deleted.  Resources will automatically be re-scheduled if the Linode is powered off.
 
 [Learn more about the CCM concept on kubernetes.io.](https://kubernetes.io/docs/concepts/architecture/cloud-controller/)  
 
@@ -18,7 +20,7 @@ Thi CSI provides a Kubernetes `Storage Class` which can be used to create `Persi
 
 When a `PV` is deleted, the Linode Block Storage Volume will be deleted as well, based on the `ReclaimPolicy`.
 
-In this Terraform Module, the `DefaultStorageClass` is provided by the `Linode CSI`.  Any persistent volume can be defined with an alternate  `storageClass`. 
+In this Terraform Module, the `DefaultStorageClass` is provided by the `Linode CSI`.  Persistent volumes can be defined with an alternate  `storageClass`.
 
 [Learn More about Persistent Volumes on kubernetes.io.](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 
@@ -32,27 +34,36 @@ As configured in this Terraform module, any service or ingress with a specific a
 
 ## How the Linode addons are used
 
-  * [Traefik](https://traefik.io/) - The Cloud Native Edge Router
+* [Traefik](https://traefik.io/) - The Cloud Native Edge Router
   
-    Traefik is configured to use a LoadBalancer port.  
-  * mysql-ha - A database to consume block storage volume space.
-  * Wordpress - The goto "It works!" blogging application
+  Traefik is configured to use a LoadBalancer, which creates a Linode NodeBalancer.  This ingress router easily allows for public hostnames and URL paths to reach a service running in the cluster.
+
+* mysql-ha - A database to consume block storage volume space.
+
+  MySQL is backed by a PV to persist the database if the pods is terminated and scheduled on a new node.
+
+* Wordpress - The goto "It works!" blogging application
+
+  Wordpress in this example is deployed using a helm chart that relies on the `mysql-ha` for database storage, and a persistent volume to back file resources.
 
 ## Requirements
 
-1. You should have the [Helm binary](https://github.com/helm/helm/blob/master/docs/install.md) and [with tiller on the cluster](https://docs.helm.sh/using_helm/#role-based-access-control), for example:
+1. You should have the [Helm binary](https://github.com/helm/helm/blob/master/docs/install.md) [with tiller on the cluster](https://docs.helm.sh/using_helm/#role-based-access-control), for example:
 
     ```bash
+    # Install Helm (in this case, using Homebrew in OSX)
     brew install helm
 
+    # Create a RBAC service account and
+    # let Helm install itself and configure Tiller
     kubectl -n kube-system create sa tiller
     kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
     helm init --service-account tiller
     ```
 
-1. A domain that can be safely overwritten by external-dns.
+1. Choose a Linode DNS managed domain that can be safely overwritten by External-DNS.
 
-      Domain records (of type `A` and `TXT`) will be created for `dashboard`, `traefik`, and `wordpress` on the chosen domain.
+      Domain records (of type `A` and `TXT`) will be created for `dashboard` and `wordpress` on the chosen domain.
 
 ## Install
 
@@ -92,7 +103,10 @@ To uninstall the examples:
 
 1. Manually delete the domain records that were created using the [Linode CLI](https://github.com/linode/linode-cli) or the [Linode Cloud Manager](https://cloud.linode.com)
 
+1. Manually delete any Block Storage volumes that were not automatically removed.
+
+1. Manually delete any NodeBalancers that were not automatically removed.
+
 ## Notes
 
 * The MySQL-HA chart is used because it is a stateful set
-* Traefik ACME staging is intentionally set to true
