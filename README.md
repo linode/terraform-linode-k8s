@@ -35,18 +35,18 @@ $ terraform apply \
  -var server_type_master=g6-standard-2 \
  -var nodes=1 \
  -var server_type_node=g6-standard-2 \
- -var docker_version=17.12.0~ce-0~ubuntu
 ```
 
 This will do the following:
 
-- provisions three Linode Instances with Ubuntu 16.04 LTS (the Linode instance type/size of the `master` and the `node` may be different)
-- connects to the master server via SSH and installs Docker CE and kubeadm apt packages
+- provisions three Linode Instances with CoreOS ContainerLinux (the Linode instance type/size of the `master` and the `node` may be different)
+- connects to the master server via SSH and installs kubeadm, kubectl, and other Kubernetes binaries to /opt/bin
 - runs kubeadm init on the master server and configures kubectl
 - downloads the kubectl admin config file on your local machine and replaces the private IP with the public one
-- installs flannel network
-- installs cluster add-ons (Kubernetes dashboard, metrics server and Heapster)
-- starts the nodes in parallel and installs Docker CE and kubeadm
+- installs Cilium network
+- installs cluster add-ons: Kubernetes dashboard, metrics server and Heapster
+- installs Linode add-ons: CSI (LinodeBlock Storage Volumes), CCM (Linode NodeBalancers), External-DNS (Linode Domains)
+- creates the master and nodes in parallel and starts the master controllers
 - joins the nodes in the cluster using the kubeadm token obtained from the master
 
 Scale up by increasing the number of nodes:
@@ -61,6 +61,8 @@ Tear down the whole infrastructure with:
 ```bash
 terraform destroy -force
 ```
+
+Be sure to clean-up any CSI created Block Storage Volumes, and CCM created NodeBalancers that you no longer require.
 
 ### Remote control
 
@@ -96,75 +98,6 @@ Now you can access the dashboard on your computer at `http://localhost:8888`.
 
 ![Nodes](https://github.com/linode/terraform-linode-k8s/blob/master/screens/dash-nodes.png)
 
-### Expose services outside the cluster
-
-Since we're running on bare-metal and Linode doesn't offer a load balancer, the easiest way to expose
-applications outside of Kubernetes is using a NodePort service.
-
-Let's deploy the [podinfo](https://github.com/stefanprodan/k8s-podinfo) app in the default namespace.
-
-Create the podinfo nodeport service:
-
-```bash
-$ kubectl --kubeconfig ./$(terraform output kubectl_config) \
-  apply -f https://raw.githubusercontent.com/stefanprodan/k8s-podinfo/7a8506e60fca086572f16de57f87bf5430e2df48/deploy/podinfo-svc-nodeport.yaml
-
-service "podinfo-nodeport" created
-```
-
-Create the podinfo deployment:
-
-```bash
-$ kubectl --kubeconfig ./$(terraform output kubectl_config) \
-  apply -f https://raw.githubusercontent.com/stefanprodan/k8s-podinfo/7a8506e60fca086572f16de57f87bf5430e2df48/deploy/podinfo-dep.yaml
-
-deployment "podinfo" created
-```
-
-Inspect the podinfo service to obtain the port number:
-
-```bash
-$ kubectl --kubeconfig ./$(terraform output kubectl_config) \
-  get svc --selector=app=podinfo
-
-NAME               TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-podinfo-nodeport   NodePort   10.104.132.14   <none>        9898:31190/TCP   3m
-```
-
-You can access podinfo at `http://<MASTER_PUBLIC_IP>:31190` or using curl:
-
-```bash
-$ curl http://$(terraform output k8s_master_public_ip):31190
-
-runtime:
-  arch: arm
-  max_procs: "4"
-  num_cpu: "4"
-  num_goroutine: "12"
-  os: linux
-  version: go1.9.2
-labels:
-  app: podinfo
-  pod-template-hash: "1847780700"
-annotations:
-  kubernetes.io/config.seen: 2018-01-08T00:39:45.580597397Z
-  kubernetes.io/config.source: api
-environment:
-  HOME: /root
-  HOSTNAME: podinfo-5d8ccd4c44-zrczc
-  KUBERNETES_PORT: tcp://10.96.0.1:443
-  KUBERNETES_PORT_443_TCP: tcp://10.96.0.1:443
-  KUBERNETES_PORT_443_TCP_ADDR: 10.96.0.1
-  KUBERNETES_PORT_443_TCP_PORT: "443"
-  KUBERNETES_PORT_443_TCP_PROTO: tcp
-  KUBERNETES_SERVICE_HOST: 10.96.0.1
-  KUBERNETES_SERVICE_PORT: "443"
-  KUBERNETES_SERVICE_PORT_HTTPS: "443"
-  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-externalIP:
-  IPv4: 163.172.139.112
-```
-
 ### Horizontal Pod Autoscaling
 
 Starting from Kubernetes 1.9 `kube-controller-manager` is configured by default with
@@ -191,8 +124,8 @@ $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
   "items": [
     {
       "metadata": {
-        "name": "arm-master-1",
-        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/arm-master-1",
+        "name": "linode-master-1",
+        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/linode-master-1",
         "creationTimestamp": "2018-01-08T15:17:09Z"
       },
       "timestamp": "2018-01-08T15:17:00Z",
@@ -204,8 +137,8 @@ $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
     },
     {
       "metadata": {
-        "name": "arm-node-1",
-        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/arm-node-1",
+        "name": "linode-node-1",
+        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/linode-node-1",
         "creationTimestamp": "2018-01-08T15:17:09Z"
       },
       "timestamp": "2018-01-08T15:17:00Z",
@@ -217,8 +150,8 @@ $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
     },
     {
       "metadata": {
-        "name": "arm-node-2",
-        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/arm-node-2",
+        "name": "linode-node-2",
+        "selfLink": "/apis/metrics.k8s.io/v1beta1/nodes/linode-node-2",
         "creationTimestamp": "2018-01-08T15:17:09Z"
       },
       "timestamp": "2018-01-08T15:17:00Z",
