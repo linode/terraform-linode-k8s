@@ -1,4 +1,4 @@
-# k8s-linode-terraform
+# terraform-linode-k8s
 
 Kubernetes Terraform installer for Linode Instances
 
@@ -7,8 +7,8 @@ Kubernetes Terraform installer for Linode Instances
 Clone the repository and install the dependencies:
 
 ```bash
-$ git clone https://github.com/cliedeman/k8s-linode-terraform.git
-$ cd k8s-linode-terraform
+$ git clone https://github.com/linode/terraform-linode-k8s.git
+$ cd terraform-linode-k8s
 $ terraform init
 ```
 
@@ -92,9 +92,9 @@ $ kubectl --kubeconfig ./$(terraform output kubectl_config) \
 
 Now you can access the dashboard on your computer at `http://localhost:8888`.
 
-![Overview](https://github.com/cliedeman/k8s-linode-terraform/blob/master/screens/dash-overview.png)
+![Overview](https://github.com/linode/terraform-linode-k8s/blob/master/screens/dash-overview.png)
 
-![Nodes](https://github.com/cliedeman/k8s-linode-terraform/blob/master/screens/dash-nodes.png)
+![Nodes](https://github.com/linode/terraform-linode-k8s/blob/master/screens/dash-nodes.png)
 
 ### Expose services outside the cluster
 
