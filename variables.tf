@@ -1,8 +1,3 @@
-variable "docker_version" {
-  default     = "17.03.0~ce-0~ubuntu-xenial"
-  description = "Use 17.12.0~ce-0~ubuntu for x86_64 and 17.03.0~ce-0~ubuntu-xenial for arm"
-}
-
 variable "cni_version" {
   default     = "v0.6.0"
   description = "Container Network Plugin Version"
@@ -41,7 +36,7 @@ variable "linode_token" {
 }
 
 variable "linode_group" {
-  default = "k8-terraform-test"
+  default = "k8s-terraform"
 }
 
 variable "ssh_private_key" {

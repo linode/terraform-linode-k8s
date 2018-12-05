@@ -2,36 +2,6 @@
 
 This directory contains simple helm scripts to confirm the the various Linode Addons are working.
 
-## Addon Summary
-
-### [**Linode Cloud Controller Manager (CCM)**](https://github.com/linode/linode-cloud-controller-manager)
-
-A primary function of the CCM is to register and maintain Kubernetes `LoadBalancer` settings within a Linode [`NodeBalancer`](https://www.linode.com/nodebalancers).  This is needed to allow traffic from the Internet into the cluster in the most fault tollerant way (obviously very important!)
-
-The CCM also annotates new Kubernetes Nodes with Linode specific details, including the LinodeID and instance type.  Linode hostnames and network addresses are automatically associated with their corresponding Kubernetes resources, forming the basis for a variety of Kubernetes features.  T
-
-The CCM monitors the Linode API for changes in the Linode instance and will remove a Kubernetes Node if it finds the Linode has been deleted.  Resources will automatically be re-scheduled if the Linode is powered off.
-
-[Learn more about the CCM concept on kubernetes.io.](https://kubernetes.io/docs/concepts/architecture/cloud-controller/)  
-
-### [**Linode Container Storage Interface (CSI)**](https://github.com/linode/linode-blockstorage-csi-driver)
-
-Thi CSI provides a Kubernetes `Storage Class` which can be used to create `Persistent Volumes` (PV) using [Linode Block Storage Volumes](https://www.linode.com/blockstorage).  Pods then create `Persistent Volume Claims` (PVC) to attach to these volumes.
-
-When a `PV` is deleted, the Linode Block Storage Volume will be deleted as well, based on the `ReclaimPolicy`.
-
-In this Terraform Module, the `DefaultStorageClass` is provided by the `Linode CSI`.  Persistent volumes can be defined with an alternate  `storageClass`.
-
-[Learn More about Persistent Volumes on kubernetes.io.](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
-
-### [**External-DNS support for Linode**](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/linode.md)
-
-Unlike [CoreDNS](https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/) (or KubeDNS), which provides DNS services within the Kubernetes cluster, [External-DNS](https://github.com/kubernetes-incubator/external-dns/blob/master/README.md) publishes the public facing IP addresses associated with exposed services to a public DNS server, such as the [Linode DNS Manager](https://www.linode.com/dns-manager).
-
-As configured in this Terraform module, any service or ingress with a specific annotation, will have a DNS record managed for it, pointing to the appropriate Linode or NodeBalancer IP address.  The domain must already be configured in the [Linode DNS Manager](https://www.linode.com/docs/platform/manager/dns-manager/#domain-zones).
-
-[Learn more at the External-DNS Github project.](https://github.com/kubernetes-incubator/external-dns)
-
 ## How the Linode addons are used
 
 * [Traefik](https://traefik.io/) - The Cloud Native Edge Router
