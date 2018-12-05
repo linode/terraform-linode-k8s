@@ -9,7 +9,7 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default = "v1.13.0-beta.2"
+  default = "v1.13.0"
 }
 
 variable "k8s_feature_gates" {
