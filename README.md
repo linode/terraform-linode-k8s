@@ -167,7 +167,7 @@ terraform init --from-module=linode/k8s/linode linode-k8s
 
 ### Contribution Guidelines
 
-Want to improve the linode-blockstorage-csi-driver? Please start [here](.github/CONTRIBUTING.md).
+Would you like to improve the `terraform-linode-k8s` module? Please start [here](https://github.com/linode/terraform-linode-k8s/blob/master/.github/CONTRIBUTING.md).
 
 ### Join us on Slack
 
