@@ -41,8 +41,6 @@ resource "linode_instance" "k8s_node" {
   provisioner "remote-exec" {
     inline = [
       "set -e",
-      "set -x",
-      "sleep 20", # Internet connectivity issues otherwise
       "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
       "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
       "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${self.private_ip_address} ${var.k8s_feature_gates}",
