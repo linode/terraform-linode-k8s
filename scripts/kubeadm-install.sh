@@ -25,8 +25,9 @@ mkdir -p /etc/kubernetes/manifests
 mkdir -p /opt/cni/bin
 curl -L 2>/dev/null "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
 
+CRICTL_VERSION="v1.12.0"
 mkdir -p /opt/bin
-curl -L 2>/dev/null "https://github.com/kubernetes-incubator/cri-tools/releases/download/${K8S_VERSION}/crictl-${K8S_VERSION}-linux-amd64.tar.gz" | tar -C /opt/bin -xz
+curl -L 2>/dev/null "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CTICTL_VERSION}-linux-amd64.tar.gz" | tar -C /opt/bin -xz
 
 mkdir -p /opt/bin
 cd /opt/bin
