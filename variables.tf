@@ -21,11 +21,6 @@ variable "server_type_master" {
   description = "Values: g6-standard-2 g6-standard-4"
 }
 
-variable "master_disk_size" {
-  default = 81920
-  description = "The size of the root disk to use for Masters"
-}
-
 variable "server_type_node" {
   default     = "g6-standard-2"
   description = "Values: g6-standard-2 g6-standard-4"
@@ -33,11 +28,6 @@ variable "server_type_node" {
 
 variable "nodes" {
   default = 1
-}
-
-variable "node_disk_size" {
-  default = 81920
-  description = "The size of the root disk to use for Nodes"
 }
 
 variable "linode_token" {

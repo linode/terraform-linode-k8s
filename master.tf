@@ -1,3 +1,7 @@
+data "linode_instance_type" "master" {
+  id = "${var.server_type_master}"
+}
+
 resource "linode_instance" "k8s_master" {
   count      = 1
   region     = "${var.region}"
@@ -8,7 +12,7 @@ resource "linode_instance" "k8s_master" {
 
   disk {
     label           = "boot"
-    size            = "${var.master_disk_size}"
+    size            = "${data.linode_instance_type.master.disk}"
     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
     image           = "linode/containerlinux"
   }
