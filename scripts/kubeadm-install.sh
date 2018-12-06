@@ -11,6 +11,13 @@ cat << EOF > /etc/default/kubelet
 KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=${K8S_FEATURE_GATES}"
 EOF
 
+# enable ipvs
+sudo modprobe ip_vs
+sudo modprobe ip_vs_rr
+sudo modprobe ip_vs_wrr
+sudo modprobe ip_vs_sh
+sudo modprobe nf_conntrack_ipv4
+
 # Make sure we have Internet connectivity before proceeding
 n=0
 until [ $n -ge 120 ]
