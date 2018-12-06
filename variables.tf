@@ -26,6 +26,9 @@ variable "server_type_node" {
   description = "Values: g6-standard-2 g6-standard-4"
 }
 
+variable "masters" {
+  default = 1
+}
 variable "nodes" {
   default = 1
 }
