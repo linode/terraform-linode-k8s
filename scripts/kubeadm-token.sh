@@ -11,4 +11,4 @@ CMD=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/de
     core@$HOST sudo kubeadm token create --print-join-command)
 
 # Produce a JSON object containing the join command
-echo "{\"command\":$CMD}"
+echo "{\"command\":\"$CMD\"}"
