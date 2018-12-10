@@ -7,7 +7,7 @@ output "kubeadm_join_command" {
 }
 
 output "nodes_public_ip" {
-  value = "${modules.nodes.nodes_public_ip}"
+  value = "${module.nodes.nodes_public_ip}"
 }
 
 output "kubectl_config" {

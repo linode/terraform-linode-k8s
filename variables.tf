@@ -29,6 +29,7 @@ variable "server_type_node" {
 variable "masters" {
   default = 1
 }
+
 variable "nodes" {
   default = 1
 }

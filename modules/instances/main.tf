@@ -2,7 +2,6 @@ data "linode_instance_type" "type" {
   id = "${var.node_type}"
 }
 
-
 resource "linode_instance" "instance" {
   count      = "${var.node_count}"
   region     = "${var.region}"
@@ -13,7 +12,7 @@ resource "linode_instance" "instance" {
 
   disk {
     label           = "boot"
-    size            = "${datasource.linode_instance_type.type.disk}"
+    size            = "${data.linode_instance_type.type.disk}"
     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
     image           = "linode/containerlinux"
   }
@@ -28,21 +27,20 @@ resource "linode_instance" "instance" {
         disk_label = "boot"
       }
     }
+  }
 
-    provisioner "remote-exec" {
-        inline = [
-            "set -e",
-            "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
-            "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
-            "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${var.use_public ? self.ip_address : self.private_ip_address} ${var.k8s_feature_gates}",
-        ]
+  provisioner "remote-exec" {
+    inline = [
+      "set -e",
+      "chmod +x /tmp/start.sh && sudo /tmp/start.sh",
+      "chmod +x /tmp/linode-network.sh && sudo /tmp/linode-network.sh ${self.private_ip_address} ${self.label}",
+      "chmod +x /tmp/kubeadm-install.sh && sudo /tmp/kubeadm-install.sh ${var.k8s_version} ${var.cni_version} ${self.label} ${var.use_public ? self.ip_address : self.private_ip_address} ${var.k8s_feature_gates}",
+    ]
 
-        connection {
-            user    = "core"
-            timeout = "300s"
-        }
+    connection {
+      user    = "core"
+      timeout = "300s"
     }
-
   }
 
   provisioner "file" {
