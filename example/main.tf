@@ -6,12 +6,14 @@
 // 
 // ## TODO
 // - Fix timeouts (set better "depends_on" values)
-// - Fix permission issue with helm listing configmaps from the kube-system namespace
+// - Fix permission issue with helm listing configmaps from the kube-system namespace:
+//   https://github.com/terraform-providers/terraform-provider-helm/issues/77
 
 module "linode_k8s" {
   # source = "linode/k8s/linode"
   # version      = "0.0.6"
   source = "git::https://github.com/displague/terraform-linode-k8s?ref=separate_modules"
+
   nodes        = "${var.nodes}"
   linode_token = "${var.linode_token}"
 }
@@ -28,9 +30,54 @@ variable "linode_domain" {
   description = "Domain managed by Linode Domain Manager"
 }
 
+provider "kubernetes" {
+  config_path = "${module.linode_k8s.kubectl_config}"
+}
+
+resource "kubernetes_service_account" "tiller" {
+  metadata {
+    name      = "tiller"
+    namespace = "kube-system"
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "tiller" {
+  depends_on = ["kubernetes_service_account.tiller"]
+
+  metadata {
+    name = "tiller"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind = "User"
+    name = "system:serviceaccount:kube-system:tiller"
+  }
+}
+
+resource null_resource "tiller" {
+  depends_on = ["kubernetes_cluster_role_binding.tiller"]
+
+  provisioner "local-exec" {
+    environment {
+      KUBECONFIG = "${module.linode_k8s.kubectl_config}"
+    }
+
+    command = "helm init --service-account tiller --wait"
+  }
+}
+
 provider "helm" {
+  service_account = "tiller"
+  namespace       = "kube-system"
+  install_tiller  = false
+
   kubernetes {
-//    host        = "https://${module.linode_k8s.k8s_master_public_ip}"
     config_path = "${module.linode_k8s.kubectl_config}"
   }
 }
@@ -44,7 +91,7 @@ resource "helm_release" "wordpress" {
   depends_on = ["helm_release.mysqlha"]
   name       = "stable"
   chart      = "wordpress"
-  version    = "3.0.2"
+  version    = "5.0.1"
   values     = ["${file("${path.module}/values/wordpress.values.yaml")}"]
 
   set {
@@ -63,7 +110,7 @@ resource "helm_release" "mysqlha" {
 resource "helm_release" "traefik" {
   name    = "stable"
   chart   = "traefik"
-  version = "1.54.0"
+  version = "1.55.1"
   values  = ["${file("${path.module}/values/traefik.values.yaml")}"]
 
   set {
