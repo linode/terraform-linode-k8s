@@ -25,6 +25,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
+      host    = "${module.master_instance.public_ip_address}"
     }
   }
 
@@ -44,16 +45,17 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
+      host    = "${module.master_instance.public_ip_address}"
     }
   }
 }
 
 data "external" "kubeadm_join" {
-  program = ["${path.module}/scripts/kubeadm-token.sh"]
+  program = ["${path.module}/scripts/local/kubeadm-token.sh"]
 
   query = {
     host = "${module.master_instance.public_ip_address}"
   }
 
-  depends_on = ["module.master_instance"]
+  depends_on = ["null_resource.masters_provisioner"]
 }

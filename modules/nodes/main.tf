@@ -2,7 +2,7 @@ module "node" {
   source         = "../instances"
   label_prefix   = "${var.label_prefix}"
   node_type      = "${var.node_type}"
-  node_count     = "1"
+  node_count     = "${var.node_count}"
   node_class     = "node"
   private_ip     = "true"
   ssh_public_key = "${var.ssh_public_key}"
@@ -28,7 +28,7 @@ resource "null_resource" "kubeadm_join" {
     ]
 
     connection {
-      host    = "${element(module.node.*.public_ip, var.node_count)}"
+      host    = "${element(module.node.nodes_public_ip, count.index)}"
       user    = "core"
       timeout = "300s"
     }
