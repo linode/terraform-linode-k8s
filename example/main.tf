@@ -1,8 +1,23 @@
+// # Work In Progress Example
+// 
+// This generally demonstrates how to use the terraform-linode-k8s module, however there
+// are some provisioning errors with the usage of the helm provider here.  The
+// install.sh script in this example/ directory is equivalent.
+// 
+// ## TODO
+// - Fix timeouts (set better "depends_on" values)
+// - Fix permission issue with helm listing configmaps from the kube-system namespace
+
 module "linode_k8s" {
-  source       = "linode/k8s/linode"
-  version      = "0.0.5"
-  nodes        = "1"
+  # source = "linode/k8s/linode"
+  # version      = "0.0.6"
+  source = "git::https://github.com/displague/terraform-linode-k8s?ref=separate_modules"
+  nodes        = "${var.nodes}"
   linode_token = "${var.linode_token}"
+}
+
+variable "nodes" {
+  default = "3"
 }
 
 variable "linode_token" {
@@ -15,7 +30,7 @@ variable "linode_domain" {
 
 provider "helm" {
   kubernetes {
-    host        = "https://${module.linode_k8s.k8s_master_public_ip}"
+//    host        = "https://${module.linode_k8s.k8s_master_public_ip}"
     config_path = "${module.linode_k8s.kubectl_config}"
   }
 }
