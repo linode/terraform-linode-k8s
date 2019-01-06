@@ -26,6 +26,10 @@ variable "server_type_node" {
   description = "Values: g6-standard-2 g6-standard-4"
 }
 
+variable "disk_size" {
+  default = 81920
+}
+
 variable "nodes" {
   default = 1
 }
