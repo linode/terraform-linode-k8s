@@ -26,6 +26,16 @@ variable "server_type_node" {
   description = "Values: g6-standard-2 g6-standard-4"
 }
 
+variable "disk_size_master" {
+  default     = 0
+  description = "Min: 8192, size of master server disk in MB"
+}
+
+variable "disk_size_node" {
+  default     = 0
+  description = "Min: 8192, size of node server disk in MB"
+}
+
 variable "nodes" {
   default = 1
 }

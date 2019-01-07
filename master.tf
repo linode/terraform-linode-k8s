@@ -12,7 +12,7 @@ resource "linode_instance" "k8s_master" {
 
   disk {
     label           = "boot"
-    size            = "${data.linode_instance_type.master.disk}"
+    size            = "${var.disk_size_master > 8191 ? var.disk_size_master : data.linode_instance_type.master.disk}"
     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
     image           = "linode/containerlinux"
   }
