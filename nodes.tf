@@ -1,3 +1,7 @@
+data "linode_instance_type" "node" {
+  id = "${var.server_type_node}"
+}
+
 resource "linode_instance" "k8s_node" {
   count      = "${var.nodes}"
   region     = "${var.region}"
@@ -8,7 +12,7 @@ resource "linode_instance" "k8s_node" {
 
   disk {
     label           = "boot"
-    size            = 81920
+    size            = "${data.linode_instance_type.node.disk}"
     authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
     image           = "linode/containerlinux"
   }
