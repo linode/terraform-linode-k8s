@@ -3,7 +3,7 @@
 set -e
 
 # Extract "host" argument from the input into HOST shell variable
-eval "$(jq -r '@sh "HOST=\(.host)"')"
+eval "$(python -c 'import sys, json; print("HOST="+json.load(sys.stdin)["host"])')"
 
 # TODO: pass the ssh key into this command
 # Fetch the join command
@@ -11,4 +11,4 @@ CMD=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/de
     core@$HOST sudo kubeadm token create --print-join-command)
 
 # Produce a JSON object containing the join command
-jq -n --arg command "$CMD" '{"command":$command}'
+echo "{\"command\":\"$CMD\"}"

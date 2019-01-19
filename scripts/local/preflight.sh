@@ -10,4 +10,4 @@ function assertInstalled() {
     done
 }
 
-assertInstalled jq ssh scp sed kubectl
+assertInstalled ssh scp sed kubectl

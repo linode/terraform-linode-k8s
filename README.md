@@ -9,7 +9,6 @@ Cluster size and instance types are configurable through Terraform variables.
 ### Prerequisites
 
 * Terraform must be installed
-* `jq` must be installed
 * SSH should be installed and configured with an SSH Key and Agent (Recommended)
 * Having kubectl installed is recommended
 
