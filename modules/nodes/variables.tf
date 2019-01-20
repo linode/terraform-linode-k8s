@@ -1,32 +1,53 @@
 variable "node_count" {
-  default = "1"
-}
-
-variable "group" {
-  default = ""
+  default     = "1"
+  description = "Number of Kubernetes Nodes to provision"
 }
 
 variable "node_class" {
-  default = "node"
+  default     = "node"
+  description = "Node class is determines Kubernetes provisioning behavior (also used as a Linode label prefix)"
 }
 
 variable "node_type" {
-  default = "g-standard-4"
+  default     = "g6-standard-4"
+  description = "Linode Instance type for nodes"
 }
 
 variable "private_ip" {
-  default = true
+  default     = true
+  description = "Enables Linode Instance Private IP addresses"
 }
 
 variable "label_prefix" {
-  default = ""
+  default     = ""
+  description = "Linode label prefix"
 }
 
-variable "kubeadm_join_command" {}
-variable "region" {}
-variable "ssh_public_key" {}
-variable "linode_group" {}
+variable "linode_group" {
+  default     = ""
+  description = "Linode display group for provisioned instances"
+}
 
-variable "k8s_version" {}
-variable "cni_version" {}
-variable "k8s_feature_gates" {}
+variable "kubeadm_join_command" {
+  description = "Kubernetes 'kubeadm join' command to join this node to the cluster"
+}
+
+variable "region" {
+  description = "Linode region for instances"
+}
+
+variable "ssh_public_key" {
+  description = "SSH keys authorized for the Linux user account (core on Container Linux, root otherwise)"
+}
+
+variable "k8s_version" {
+  description = "Kubernetes version to install"
+}
+
+variable "cni_version" {
+  description = "CNI version to install"
+}
+
+variable "k8s_feature_gates" {
+  description = "Kubernetes Feature gates to enable in the Kubelet"
+}
