@@ -164,6 +164,14 @@ Or if you won't be submitting changes, you can use `terraform init`:
 terraform init --from-module=linode/k8s/linode linode-k8s
 ```
 
+### Modules
+
+This terraform modules is composed of three sub-modules for reuse and separation of concerns.
+
+* Instance - Accepts all necessary Linode Instance provisioning variables and performs CoreOS Container Linux common tasks for the Linode environment.
+* Master - Uses the Instance module as a base and futher provisions a Kubernetes control-plane.
+* Node - Uses the Instance module as a base and further provisions a Kubernetes worker joined to a control-plane using module parameters.
+
 ### Contribution Guidelines
 
 Would you like to improve the `terraform-linode-k8s` module? Please start [here](https://github.com/linode/terraform-linode-k8s/blob/master/.github/CONTRIBUTING.md).
