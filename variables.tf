@@ -38,14 +38,14 @@ variable "nodes" {
   description = "Number of worker nodes to provision"
 }
 
+variable "cluster_name" {
+  default     = ""
+  description = "Name of the Kubernetes cluster"
+}
+
 variable "linode_token" {
   type        = "string"
   description = "Linode API v4 Personal Access Token"
-}
-
-variable "linode_group" {
-  default     = "k8s-terraform"
-  description = "Linode display group for created nodes"
 }
 
 variable "ssh_private_key" {

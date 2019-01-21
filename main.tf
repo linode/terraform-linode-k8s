@@ -20,7 +20,7 @@ resource "null_resource" "preflight-checks" {
 
 module "masters" {
   source       = "./modules/masters"
-  label_prefix = "${terraform.workspace}"
+  label_prefix = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
   node_class   = "master"
   node_count   = "${var.masters}"
   node_type    = "${var.server_type_master}"
@@ -31,15 +31,15 @@ module "masters" {
   cni_version       = "${var.cni_version}"
   ssh_public_key    = "${var.ssh_public_key}"
   region            = "${var.region}"
-  linode_group      = "${var.linode_group}"
+  linode_group      = "${var.cluster_name}"
 
   //todo variable instead of workspace?
-  cluster_name = "${terraform.workspace}"
+  cluster_name = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
 }
 
 module "nodes" {
   source       = "./modules/nodes"
-  label_prefix = "${terraform.workspace}"
+  label_prefix = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
   node_class   = "node"
   node_count   = "${var.nodes}"
   node_type    = "${var.server_type_node}"
@@ -49,7 +49,7 @@ module "nodes" {
   cni_version          = "${var.cni_version}"
   ssh_public_key       = "${var.ssh_public_key}"
   region               = "${var.region}"
-  linode_group         = "${var.linode_group}"
+  linode_group         = "${var.cluster_name}"
   kubeadm_join_command = "${module.masters.kubeadm_join_command}"
 }
 
