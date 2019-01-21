@@ -34,7 +34,7 @@ variable "masters" {
 }
 
 variable "nodes" {
-  default     = 1
+  default     = 3
   description = "Number of worker nodes to provision"
 }
 
