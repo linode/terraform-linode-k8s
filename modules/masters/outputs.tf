@@ -9,6 +9,6 @@ output "k8s_master_private_ip" {
 }
 
 output "kubeadm_join_command" {
-  // depends_on = ["module.master_instance", "data.external.kubeadm_join"]
+  depends_on = ["module.master_instance", "data.external.kubeadm_join"]
   value      = "${lookup(data.external.kubeadm_join.result, "command", "")}"
 }
