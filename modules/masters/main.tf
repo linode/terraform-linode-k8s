@@ -57,5 +57,5 @@ data "external" "kubeadm_join" {
     host = "${module.master_instance.public_ip_address}"
   }
 
-  depends_on = ["module.master_instance", "null_resource.masters_provisioner"]
+  depends_on = ["null_resource.masters_provisioner"]
 }

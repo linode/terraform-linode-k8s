@@ -8,7 +8,16 @@ output "k8s_master_private_ip" {
   value      = "${module.master_instance.private_ip_address}"
 }
 
+locals {
+  result = {
+    command = ""
+  }
+
+  kubeadm_join_results = "${concat(data.external.kubeadm_join.*.result, list(local.result))}"
+  kubeadm_join_command = "${lookup(local.kubeadm_join_results["0"], "command", "")}"
+}
+
 output "kubeadm_join_command" {
-  depends_on = ["module.master_instance", "data.external.kubeadm_join"]
-  value      = "${lookup(data.external.kubeadm_join.result, "command", "")}"
+  depends_on = ["null_resource.masters_provisioner"]
+  value      = "${local.kubeadm_join_command}"
 }
