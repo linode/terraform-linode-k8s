@@ -33,11 +33,23 @@ Create a `main.tf` file in a new directory with the following contents:
 ```hcl
 module "k8s" {
   source  = "linode/k8s/linode"
+
   linode_token = "YOUR TOKEN HERE"
 }
 ```
 
 That's all it takes to get started!
+
+Pin to a specific module version using `version = "..."` to avoid upgrading to a version with breaking changes.  Upgrades to this module could potentially replace all master and worker nodes resulting in data loss.  The `terraform plan` will report this, but it may not be obvious.
+
+```hcl
+module "k8s" {
+  source  = "linode/k8s/linode"
+  version = "0.1.0"
+
+  linode_token = "YOUR TOKEN HERE"
+}
+```
 
 Choose a Terraform workspace name (because the default is `default`).  In this example we've chosen `linode`.  The workspace name will be used as a prefix for Linode resource created in this cluster, for example: `linode-master-1`, `linode-node-1`.  Alternate workspaces can be created and selected to change clusters.
 
