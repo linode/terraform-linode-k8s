@@ -1,13 +1,13 @@
 output "k8s_master_public_ip" {
-  value = "${linode_instance.k8s_master.0.ip_address}"
+  value = "${module.masters.k8s_master_public_ip}"
 }
 
 output "kubeadm_join_command" {
-  value = "${data.external.kubeadm_join.result["command"]}"
+  value = "${module.masters.kubeadm_join_command}"
 }
 
 output "nodes_public_ip" {
-  value = "${concat(linode_instance.k8s_node.*.label, linode_instance.k8s_node.*.ip_address)}"
+  value = "${module.nodes.nodes_public_ip}"
 }
 
 output "kubectl_config" {
