@@ -10,9 +10,12 @@
 //   https://github.com/terraform-providers/terraform-provider-helm/issues/77
 
 module "linode_k8s" {
-  # source = "linode/k8s/linode"
-  # version      = "0.0.6"
-  source = "git::https://github.com/displague/terraform-linode-k8s?ref=separate_modules"
+  # Work against a branch:
+  # source = "git::https://github.com/linode/terraform-linode-k8s?ref=some_branch"
+  #
+  # Or download a tagged releases
+  source = "linode/k8s/linode"
+  version      = "0.1.0"
 
   nodes        = "${var.nodes}"
   linode_token = "${var.linode_token}"
