@@ -13,6 +13,7 @@ module "node" {
   k8s_version       = "${var.k8s_version}"
   k8s_feature_gates = "${var.k8s_feature_gates}"
   cni_version       = "${var.cni_version}"
+  crictl_version    = "${var.crictl_version}"
 }
 
 // todo: does the use of var.kubeadm_join_command (from master output)  queue nodes behind masters? move to parent main.tf if so

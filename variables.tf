@@ -8,6 +8,11 @@ variable "k8s_version" {
   description = "Kubernetes version to install"
 }
 
+variable "crictl_version" {
+  default     = "v1.12.0"
+  description = "Container Runtime Interface version to install"
+}
+
 variable "k8s_feature_gates" {
   default     = "CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true"
   description = "Feature gates to enable in the Kubelet and API server"

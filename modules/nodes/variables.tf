@@ -48,6 +48,10 @@ variable "cni_version" {
   description = "CNI version to install"
 }
 
+variable "crictl_version" {
+  description = "Contrainer Runtime Interface version to install"
+}
+
 variable "k8s_feature_gates" {
   description = "Kubernetes Feature gates to enable in the Kubelet"
 }

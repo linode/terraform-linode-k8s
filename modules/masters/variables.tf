@@ -35,6 +35,10 @@ variable "cni_version" {
   description = "Container Network Plugin Version"
 }
 
+variable "crictl_version" {
+  description = "Contrainer Runtime Interface version to install"
+}
+
 variable "cluster_name" {
   description = "Name of the Kubernetes cluster"
 }

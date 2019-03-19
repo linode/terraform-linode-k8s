@@ -3,9 +3,10 @@ set -o nounset -o errexit
 
 K8S_VERSION=$1
 CNI_VERSION=$2
-HOSTNAME=$3
-NODE_IP=$4
-K8S_FEATURE_GATES="$5"
+CRICTL_VERSION="$3"
+HOSTNAME=$4
+NODE_IP=$5
+K8S_FEATURE_GATES="$6"
 
 cat << EOF > /etc/default/kubelet
 KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=${K8S_FEATURE_GATES}"
@@ -32,7 +33,6 @@ mkdir -p /etc/kubernetes/manifests
 mkdir -p /opt/cni/bin
 curl -L 2>/dev/null "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
 
-CRICTL_VERSION="v1.12.0"
 mkdir -p /opt/bin
 curl -L 2>/dev/null "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" | tar -C /opt/bin -xz
 

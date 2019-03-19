@@ -11,7 +11,7 @@ if [ -z "$HOST" ]; then
   echo "{\"command\":\"\"}"
 else
   CMD=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-    core@$HOST sudo kubeadm token create --print-join-command)
+    core@$HOST sudo kubeadm token create --print-join-command | awk '/kubeadm/ && ! /control-plane/ {gsub(/^[ \t]/, "", $0); print $0}' )
   # Produce a JSON object containing the join command
   echo "{\"command\":\"$CMD\"}"
 fi

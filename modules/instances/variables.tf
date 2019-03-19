@@ -47,6 +47,10 @@ variable "k8s_version" {
   description = "Kubernetes version to install"
 }
 
+variable "crictl_version" {
+  description = "Contrainer Runtime Interface version to install"
+}
+
 variable "k8s_feature_gates" {
   description = "Feature gates to enable in the Kubelet and API server"
 }
