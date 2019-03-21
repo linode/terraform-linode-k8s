@@ -48,7 +48,7 @@ variable "k8s_version" {
 }
 
 variable "crictl_version" {
-  description = "Contrainer Runtime Interface version to install"
+  description = "Container Runtime Interface version to install"
 }
 
 variable "k8s_feature_gates" {
