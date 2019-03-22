@@ -39,6 +39,7 @@ resource "null_resource" "masters_provisioner" {
       "kubectl apply -f /tmp/calico.yaml",
       "chmod +x /tmp/linode-addons.sh && /tmp/linode-addons.sh ${var.region} ${var.linode_token}",
       "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh",
+      "chmod +x /tmp/update-operator.sh && /tmp/update-operator.sh",
       "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
     ]
 
