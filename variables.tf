@@ -4,8 +4,13 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default     = "v1.13.2"
+  default     = "v1.13.4"
   description = "Kubernetes version to install"
+}
+
+variable "crictl_version" {
+  default     = "v1.13.0"
+  description = "Container Runtime Interface version to install"
 }
 
 variable "k8s_feature_gates" {

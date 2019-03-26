@@ -11,6 +11,7 @@ module "master_instance" {
   k8s_version       = "${var.k8s_version}"
   k8s_feature_gates = "${var.k8s_feature_gates}"
   cni_version       = "${var.cni_version}"
+  crictl_version    = "${var.crictl_version}"
   ssh_public_key    = "${var.ssh_public_key}"
   region            = "${var.region}"
 }

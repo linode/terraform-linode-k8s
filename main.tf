@@ -27,6 +27,7 @@ module "masters" {
   linode_token = "${var.linode_token}"
 
   k8s_version       = "${var.k8s_version}"
+  crictl_version    = "${var.crictl_version}"
   k8s_feature_gates = "${var.k8s_feature_gates}"
   cni_version       = "${var.cni_version}"
   ssh_public_key    = "${var.ssh_public_key}"
@@ -45,6 +46,7 @@ module "nodes" {
   node_type    = "${var.server_type_node}"
 
   k8s_version          = "${var.k8s_version}"
+  crictl_version       = "${var.crictl_version}"
   k8s_feature_gates    = "${var.k8s_feature_gates}"
   cni_version          = "${var.cni_version}"
   ssh_public_key       = "${var.ssh_public_key}"
