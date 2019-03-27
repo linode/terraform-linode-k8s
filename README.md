@@ -1,6 +1,6 @@
 # Kubernetes Terraform installer for Linode Instances
 
-This Terraform module creates a Kubernetes v1.13 Cluster on Linode Cloud infrastructure using the ContainerLinux operating system.  The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
+This Terraform module creates a Kubernetes v1.14.0 Cluster on Linode Cloud infrastructure using the ContainerLinux operating system.  The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
 
 Cluster size and instance types are configurable through Terraform variables.
 
@@ -74,8 +74,14 @@ This will do the following:
 * installs a Calico network between Linode Instances
 * runs kubeadm init on the master server and configures kubectl
 * joins the nodes in the cluster using the kubeadm token obtained from the master
-  * installs Linode add-ons: CSI (LinodeBlock Storage Volumes), CCM (Linode NodeBalancers), External-DNS (Linode Domains)
-  * installs cluster add-ons: Kubernetes dashboard, metrics server and Heapster
+  * installs Linode add-ons:
+    * [CSI](https://github.com/linode/linode-blockstorage-csi-driver/) (LinodeBlock Storage Volumes)
+    * [CCM](https://github.com/linode/linode-cloud-controller-manager) (Linode NodeBalancers)
+    * [External-DNS](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/linode.md) (Linode Domains)
+  * installs cluster add-ons:
+    * Kubernetes dashboard
+    * metrics server
+    * [Container Linux Update Operator](https://github.com/coreos/container-linux-update-operator)
 * copies the kubectl admin config file for local `kubectl` use via the public IP of the API server
 
 A full list of the supported variables are available in the [Terraform Module Registry](https://registry.terraform.io/modules/linode/k8s/linode/?tab=inputs).
