@@ -4,4 +4,4 @@ set -e
 
 # TODO swap these for helm charts
 
-kubectl apply -f /tmp/update-operator.yaml
+kubectl apply -f /home/core/init/update-operator.yaml
