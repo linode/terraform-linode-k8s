@@ -1,6 +1,6 @@
 provider "linode" {
   token   = "${var.linode_token}"
-  version = "1.4.0"
+  version = "1.5.0"
 }
 
 provider "external" {
@@ -62,5 +62,22 @@ resource "null_resource" "local_kubectl" {
   provisioner "local-exec" {
     command    = "${path.module}/scripts/local/kubectl-conf.sh ${terraform.workspace} ${module.masters.k8s_master_public_ip} ${module.masters.k8s_master_private_ip} ${var.ssh_public_key}"
     on_failure = "continue"
+  }
+}
+
+resource "null_resource" "update-agent" {
+  depends_on = ["module.masters", "module.nodes"]
+
+  triggers {
+    cluster_ips = "${"${module.masters.k8s_master_public_ip} ${join(" ", module.nodes.nodes_public_ip)}"}"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      host = "${module.masters.k8s_master_public_ip}"
+      user = "core"
+    }
+
+    inline = ["/opt/bin/kubectl annotate node --all --overwrite container-linux-update.v1.coreos.com/reboot-paused=${var.update_agent_reboot_paused}"]
   }
 }

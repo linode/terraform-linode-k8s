@@ -25,7 +25,8 @@ resource "null_resource" "kubeadm_join" {
       "set -e",
       "export PATH=$${PATH}:/opt/bin",
       "sudo ${var.kubeadm_join_command}",
-      "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
+      "sudo KUBECONFIG=/etc/kubernetes/kubelet.conf kubectl annotate node $${HOSTNAME} --overwrite container-linux-update.v1.coreos.com/reboot-paused=true",
+      "chmod +x /home/core/init/end.sh && sudo /home/core/init/end.sh",
     ]
 
     connection {
