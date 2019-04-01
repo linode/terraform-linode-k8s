@@ -285,8 +285,16 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: linodebs.csi.linode.com
 ---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: linode-block-storage-retain
+  namespace: kube-system
+provisioner: linodebs.csi.linode.com
+reclaimPolicy: Retain
+
+---
 # pkg/linode-bs/deploy/kubernetes/06-ss-csi-linode-controller.yaml
-# stateful sets needs a headless service to provide pod network indentity
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
@@ -309,7 +317,8 @@ spec:
         - name: csi-provisioner
           image: quay.io/k8scsi/csi-provisioner:v1.0.0
           args:
-            - "--provisioner=linodebs.csi.linode.com"
+            - "--volume-name-prefix=pvc"
+            - "--volume-name-uuid-length=16"
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
           env:
@@ -332,18 +341,21 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: linode-csi-plugin
-          image: linode/linode-blockstorage-csi-driver:canary
+          image: linode/linode-blockstorage-csi-driver:v0.1.0
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(LINODE_TOKEN)"
             - "--url=$(LINODE_API_URL)"
             - "--node=$(NODE_NAME)"
+            - "--bs-prefix=$(LINODE_BS_PREFIX)"
             - "--v=10"
           env:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: LINODE_API_URL
               value: https://api.linode.com/v4
+            - name: LINODE_BS_PREFIX
+              value:
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -360,6 +372,7 @@ spec:
       volumes:
         - name: socket-dir
           emptyDir: {}
+
 ---
 # pkg/linode-bs/deploy/kubernetes/07-ds-csi-linode-node.yaml
 kind: DaemonSet
@@ -404,7 +417,7 @@ spec:
             - name: registration-dir
               mountPath: /registration/
         - name: csi-linode-plugin 
-          image: linode/linode-blockstorage-csi-driver:canary
+          image: linode/linode-blockstorage-csi-driver:v0.1.0
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(LINODE_TOKEN)"
@@ -478,4 +491,5 @@ spec:
           hostPath:
             path: /sys
             type: Directory
+
 ---

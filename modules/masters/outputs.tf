@@ -1,11 +1,13 @@
 output "k8s_master_public_ip" {
-  depends_on = ["module.master_instance"]
-  value      = "${module.master_instance.public_ip_address}"
+  depends_on  = ["module.master_instance"]
+  description = "Public IP Address of the master node"
+  value       = "${module.master_instance.public_ip_address}"
 }
 
 output "k8s_master_private_ip" {
-  depends_on = ["module.master_instance"]
-  value      = "${module.master_instance.private_ip_address}"
+  depends_on  = ["module.master_instance"]
+  description = "Private IP Address of the master node"
+  value       = "${module.master_instance.private_ip_address}"
 }
 
 locals {
@@ -18,6 +20,7 @@ locals {
 }
 
 output "kubeadm_join_command" {
-  depends_on = ["null_resource.masters_provisioner"]
-  value      = "${local.kubeadm_join_command}"
+  depends_on  = ["null_resource.masters_provisioner"]
+  description = "kubeadm join command that can be used to add a node to the cluster"
+  value       = "${local.kubeadm_join_command}"
 }

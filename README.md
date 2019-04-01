@@ -1,6 +1,6 @@
 # Kubernetes Terraform installer for Linode Instances
 
-This Terraform module creates a Kubernetes v1.13 Cluster on Linode Cloud infrastructure using the ContainerLinux operating system.  The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
+This Terraform module creates a Kubernetes v1.14.0 Cluster on Linode Cloud infrastructure using the ContainerLinux operating system.  The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
 
 Cluster size and instance types are configurable through Terraform variables.
 
@@ -20,8 +20,8 @@ Before running the project you'll have to create an access token for Terraform t
 Using the token and your access key, create the `LINODE_TOKEN` environment variable:
 
 ```bash
-read -sp "Linode Token: " LINODE_TOKEN # Enter your Linode Token (it will be hidden)
-export LINODE_TOKEN
+read -sp "Linode Token: " TF_VAR_linode_token # Enter your Linode Token (it will be hidden)
+export TF_VAR_linode_token
 ```
 
 This variable will need to be supplied to every Terraform `apply`, `plan`, and `destroy` command using `-var linode_token=$LINODE_TOKEN` unless a `terraform.tfvars` file is created with this secret token.
@@ -74,8 +74,14 @@ This will do the following:
 * installs a Calico network between Linode Instances
 * runs kubeadm init on the master server and configures kubectl
 * joins the nodes in the cluster using the kubeadm token obtained from the master
-  * installs Linode add-ons: CSI (LinodeBlock Storage Volumes), CCM (Linode NodeBalancers), External-DNS (Linode Domains)
-  * installs cluster add-ons: Kubernetes dashboard, metrics server and Heapster
+  * installs Linode add-ons:
+    * [CSI](https://github.com/linode/linode-blockstorage-csi-driver/) (LinodeBlock Storage Volumes)
+    * [CCM](https://github.com/linode/linode-cloud-controller-manager) (Linode NodeBalancers)
+    * [External-DNS](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/linode.md) (Linode Domains)
+  * installs cluster add-ons:
+    * Kubernetes dashboard
+    * metrics server
+    * [Container Linux Update Operator](https://github.com/coreos/container-linux-update-operator)
 * copies the kubectl admin config file for local `kubectl` use via the public IP of the API server
 
 A full list of the supported variables are available in the [Terraform Module Registry](https://registry.terraform.io/modules/linode/k8s/linode/?tab=inputs).
@@ -160,6 +166,18 @@ Unlike [CoreDNS](https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-
 As configured in this Terraform module, any service or ingress with a specific annotation, will have a DNS record managed for it, pointing to the appropriate Linode or NodeBalancer IP address.  The domain must already be configured in the [Linode DNS Manager](https://www.linode.com/docs/platform/manager/dns-manager/#domain-zones).
 
 [Learn more at the External-DNS Github project.](https://github.com/kubernetes-incubator/external-dns)
+
+### [**Container Linux Update Operator**](https://github.com/coreos/container-linux-update-operator/)
+
+The Update Operator deploys an agent to all of the nodes (include the master) which will schedule Container Linux reboots when an update has been prepared.  The Update Operator prevents multiple nodes from rebooting at the same time.  Cordone and drain commands are sent to the nodes before rebooting.  **System update reboots are paused by default** to prevent new clusters from rebooting in the first five minutes of their life-cycle which could have an adverse effect on the Terraform provisioning process.
+
+Set the `update_agent_reboot_paused` variable using the `-var` argument, `TF_VAR_update_agent_reboot_paused` environment variable, or by creating a `update_agent.tfvars` file with the following contents:
+
+```
+update_agent_reboot_paused = "false"
+```
+
+In practice, rebooted nodes will be unavailable for a minute or two once the reboot has started.  Take advantage of the Linode Block Storage CSI driver so Persistent Volumes can be rescheduled with workloads to the available nodes.
 
 ## Development
 

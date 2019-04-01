@@ -15,7 +15,8 @@ module "linode_k8s" {
   #
   # Or download a tagged releases
   source = "linode/k8s/linode"
-  version      = "0.1.0"
+
+  version = "0.1.0"
 
   nodes        = "${var.nodes}"
   linode_token = "${var.linode_token}"

@@ -11,6 +11,7 @@ module "master_instance" {
   k8s_version       = "${var.k8s_version}"
   k8s_feature_gates = "${var.k8s_feature_gates}"
   cni_version       = "${var.cni_version}"
+  crictl_version    = "${var.crictl_version}"
   ssh_public_key    = "${var.ssh_public_key}"
   region            = "${var.region}"
 }
@@ -18,9 +19,21 @@ module "master_instance" {
 resource "null_resource" "masters_provisioner" {
   depends_on = ["module.master_instance"]
 
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /home/core/init/",
+    ]
+
+    connection {
+      user    = "core"
+      timeout = "300s"
+      host    = "${module.master_instance.public_ip_address}"
+    }
+  }
+
   provisioner "file" {
     source      = "${path.module}/manifests/"
-    destination = "/tmp"
+    destination = "/home/core/init/"
 
     connection {
       user    = "core"
@@ -33,14 +46,16 @@ resource "null_resource" "masters_provisioner" {
     # TODO advertise on public adress
     inline = [
       "set -e",
-      "chmod +x /tmp/kubeadm-init.sh && sudo /tmp/kubeadm-init.sh ${var.cluster_name} ${var.k8s_version} ${module.master_instance.public_ip_address} ${module.master_instance.private_ip_address} ${var.k8s_feature_gates}",
+      "chmod +x /home/core/init/kubeadm-init.sh && sudo /home/core/init/kubeadm-init.sh ${var.cluster_name} ${var.k8s_version} ${module.master_instance.public_ip_address} ${module.master_instance.private_ip_address} ${var.k8s_feature_gates}",
       "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown core $HOME/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
-      "kubectl apply -f /tmp/calico.yaml",
-      "chmod +x /tmp/linode-addons.sh && /tmp/linode-addons.sh ${var.region} ${var.linode_token}",
-      "chmod +x /tmp/monitoring-install.sh && /tmp/monitoring-install.sh",
-      "chmod +x /tmp/ingress-install.sh && /tmp/ingress-install.sh",
-      "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
+      "kubectl apply -f /home/core/init/calico.yaml",
+      "chmod +x /home/core/init/linode-addons.sh && /home/core/init/linode-addons.sh ${var.region} ${var.linode_token}",
+      "chmod +x /home/core/init/monitoring-install.sh && /home/core/init/monitoring-install.sh",
+      "chmod +x /home/core/init/update-operator.sh && /home/core/init/update-operator.sh",
+      "kubectl annotate node $${HOSTNAME} --overwrite container-linux-update.v1.coreos.com/reboot-paused=true",
+      "chmod +x /home/core/init/ingress-install.sh && /home/core/init/ingress-install.sh",
+      "chmod +x /home/core/init/end.sh && sudo /home/core/init/end.sh",
     ]
 
     connection {

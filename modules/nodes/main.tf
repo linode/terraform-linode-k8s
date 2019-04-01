@@ -13,6 +13,7 @@ module "node" {
   k8s_version       = "${var.k8s_version}"
   k8s_feature_gates = "${var.k8s_feature_gates}"
   cni_version       = "${var.cni_version}"
+  crictl_version    = "${var.crictl_version}"
 }
 
 // todo: does the use of var.kubeadm_join_command (from master output)  queue nodes behind masters? move to parent main.tf if so
@@ -24,7 +25,8 @@ resource "null_resource" "kubeadm_join" {
       "set -e",
       "export PATH=$${PATH}:/opt/bin",
       "sudo ${var.kubeadm_join_command}",
-      "chmod +x /tmp/end.sh && sudo /tmp/end.sh",
+      "sudo KUBECONFIG=/etc/kubernetes/kubelet.conf kubectl annotate node $${HOSTNAME} --overwrite container-linux-update.v1.coreos.com/reboot-paused=true",
+      "chmod +x /home/core/init/end.sh && sudo /home/core/init/end.sh",
     ]
 
     connection {
