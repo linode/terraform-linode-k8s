@@ -50,3 +50,15 @@ variable "ssh_public_key" {
   default     = "~/.ssh/id_rsa.pub"
   description = "The path to your public key"
 }
+
+variable "ccm_image" {
+  type        = "string"
+  default     = "linode/linode-cloud-controller-manager:latest"
+  description = "The docker repo/image:tag to use for the CCM"
+}
+
+variable "csi_image" {
+  type        = "string"
+  default     = "linode/linode-blockstorage-csi-driver:canary"
+  description = "The docker repo/image:tag to use for the CSI"
+}

@@ -16,3 +16,5 @@
 
 # Logs
 *.log
+
+manifests-tmp

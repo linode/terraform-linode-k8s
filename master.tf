@@ -40,7 +40,7 @@ resource "linode_instance" "k8s_master" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/manifests/"
+    source      = "${path.module}/manifests-tmp/"
     destination = "/tmp"
 
     connection {

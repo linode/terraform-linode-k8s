@@ -13,6 +13,6 @@ resource "null_resource" "preflight-checks" {
     key = "${uuid()}"
   }
   provisioner "local-exec" {
-    command    = "${path.module}/scripts/local/preflight.sh"
+    command    = "${path.module}/scripts/local/preflight.sh ${var.ccm_image} ${var.csi_image}"
   }
 }
