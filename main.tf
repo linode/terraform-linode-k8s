@@ -14,5 +14,6 @@ resource "null_resource" "preflight-checks" {
   }
   provisioner "local-exec" {
     command    = "${path.module}/scripts/local/preflight.sh ${var.ccm_image} ${var.csi_image}"
+    working_dir = "${path.module}"
   }
 }
