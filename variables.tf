@@ -70,3 +70,15 @@ variable "update_agent_reboot_paused" {
   default     = "true"
   description = "Pause the container-linux update-agent operator from triggering reboots.  Defaults to 'true' (Paused) to prevent the control-plane from rebooting in the first few minutes of the cluster's life-cycle."
 }
+
+variable "ccm_image" {
+  type        = "string"
+  default     = "linode/linode-cloud-controller-manager:latest"
+  description = "The docker repo/image:tag to use for the CCM"
+}
+
+variable "csi_image" {
+  type        = "string"
+  default     = "linode/linode-blockstorage-csi-driver:canary"
+  description = "The docker repo/image:tag to use for the CSI"
+}

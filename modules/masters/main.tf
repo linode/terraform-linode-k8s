@@ -32,7 +32,7 @@ resource "null_resource" "masters_provisioner" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/manifests/"
+    source      = "${path.module}/manifests-tmp/"
     destination = "/home/core/init/"
 
     connection {

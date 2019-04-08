@@ -57,7 +57,7 @@ spec:
           effect: NoSchedule
       hostNetwork: true
       containers:
-        - image: linode/linode-cloud-controller-manager:latest
+        - image: {{ .Values.CCMImage }}
           imagePullPolicy: Always
           name: ccm-linode
           args:
