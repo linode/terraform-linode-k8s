@@ -8,6 +8,5 @@ jobs:
       - image: alpine:latest
     steps:
       - checkout
-      - run: curl -L -s https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -o /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
-      - run: dep ensure -vendor-only
+      - run: wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -O /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
       - run: make test
