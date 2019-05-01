@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - master
+    docker:
+      - image: alpine:latest
+    steps:
+      - checkout
+      - run: curl -L -s https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -o /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
+      - run: dep ensure -vendor-only
+      - run: make test
