@@ -7,7 +7,7 @@ jobs:
     docker:
       - image: alpine:latest
     steps:
-      - run: apk add --update make
+      - run: apk add --update make ca-certificates
       - run: mkdir -p /opt/bin && ln -s /opt/bin/terraform /usr/bin/terraform
       - run: wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -O /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
       - checkout
