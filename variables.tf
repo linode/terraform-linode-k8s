@@ -14,7 +14,7 @@ variable "crictl_version" {
 }
 
 variable "k8s_feature_gates" {
-  default     = "CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true"
+  default     = "CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true,ExpandCSIVolumes=true,ExpandInUsePersistentVolumes=true"
   description = "Feature gates to enable in the Kubelet and API server"
 }
 
