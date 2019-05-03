@@ -1,11 +1,12 @@
 .PHONY: init plan apply destroy test
 
-export TF_INPUT=0
-export TF_WORKSPACE=testing
-export TF_IN_AUTOMATION=1
+.EXPORT_ALL_VARIABLES:
 
-export TF_VAR_nodes=1
-export TF_VAR_linode_token=$$LINODE_TOKEN
+TF_INPUT = 0
+TF_WORKSPACE = testing
+TF_IN_AUTOMATION = 1
+TF_VAR_nodes = 1
+TF_VAR_linode_token = ${LINODE_TOKEN}
 
 init:
 	terraform init
