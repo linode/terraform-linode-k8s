@@ -12,4 +12,5 @@ jobs:
       - run: wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -O /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
       - run: ssh-keygen  -q -t rsa -N '' -f $HOME/.ssh/id_rsa
       - checkout
+      - add_ssh_keys
       - run: make test
