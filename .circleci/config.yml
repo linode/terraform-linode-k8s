@@ -13,4 +13,5 @@ jobs:
       - run: ssh-keygen  -q -t rsa -N '' -f $HOME/.ssh/id_rsa
       - checkout
       - add_ssh_keys
+      - run: ssh-add $HOME/.ssh/id_rsa
       - run: make test
