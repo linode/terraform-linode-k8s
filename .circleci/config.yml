@@ -10,9 +10,14 @@ jobs:
       - run: apk add --update --no-cache make ca-certificates openssh-keygen openssh-client bash
       - run: mkdir -p /opt/bin && ln -s /opt/bin/terraform /usr/bin/terraform
       - run: wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -O /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
+      - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /opt/bin/kubectl && chmod +x /opt/bin/kubectl
       - run: ssh-keygen  -q -t rsa -N '' -f $HOME/.ssh/id_rsa
       - checkout
       - add_ssh_keys
       - run: ssh-add $HOME/.ssh/id_rsa
       - run: make test
-      - run: make destroy
+      - run:
+          name: Cleanup Failed Test
+          command: make destroy
+          when: on_fail
+
