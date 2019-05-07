@@ -15,3 +15,4 @@ jobs:
       - add_ssh_keys
       - run: ssh-add $HOME/.ssh/id_rsa
       - run: make test
+      - run: make destroy
