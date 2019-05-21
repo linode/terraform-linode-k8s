@@ -16,7 +16,7 @@ module "addl-masters" {
 }
 
 resource "linode_nodebalancer" "apiserver-nodebalancer" {
-  label = "k8s-loadbalancer"
+  label = "${var.cluster_name}"
   region = "${var.region}"
 }
 
