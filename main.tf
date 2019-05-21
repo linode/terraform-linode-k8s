@@ -58,7 +58,7 @@ module "nodes" {
 
 module "loadbalancer" {
   source = "./modules/loadbalancer"
-  addl_master_count = "${var.addl-masters}"
+  addl_master_count = "${var.addl-masters > 5 ? "5" : var.addl-masters}"
   cluster_name = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
   master_ip = "${module.masters.k8s_master_private_ip}"
   master_label = "${module.masters.label[0]}"
