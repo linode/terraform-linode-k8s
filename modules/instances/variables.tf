@@ -3,6 +3,11 @@ variable "node_count" {
   description = "Number of Kubernetes Nodes to provision"
 }
 
+variable "master_type" {
+  default     = "master"
+  description = "Node class is determines Kubernetes provisioning behavior (also used as a Linode label prefix)"
+}
+
 variable "node_class" {
   default     = "node"
   description = "Node class is determines Kubernetes provisioning behavior (also used as a Linode label prefix)"
