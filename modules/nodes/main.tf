@@ -30,7 +30,7 @@ resource "null_resource" "kubeadm_join" {
     ]
 
     connection {
-      host    = "${element(module.node.nodes_public_ip, count.index)}"
+      host    = "${element(module.node.instances_public_ip, count.index)}"
       user    = "core"
       timeout = "300s"
     }
