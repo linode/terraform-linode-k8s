@@ -35,7 +35,12 @@ variable "server_type_node" {
 
 variable "masters" {
   default     = 1
-  description = "Number of control-plane (master) nodes.  This must be 1 for now."
+  description = "Number of control-plane (master) nodes.  This must be 1."
+}
+
+variable "addl-masters" {
+  default     = 0
+  description = "Number of additional control-plane (master) nodes."
 }
 
 variable "nodes" {
