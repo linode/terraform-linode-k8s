@@ -5,7 +5,7 @@ data "linode_instance_type" "type" {
 resource "linode_instance" "instance" {
   count      = "${var.node_count}"
   region     = "${var.region}"
-  label      = "${var.label_prefix == "" ? "" : "${var.label_prefix}-"}${var.node_class}-${count.index + 1}"
+  label      = "${var.label_prefix == "" ? "" : "${var.label_prefix}-"}${var.node_class}-${var.node_class == "node" || var.master_type == "master" ? count.index + 1 : count.index + 2}"
   group      = "${var.linode_group}"
   type       = "${var.node_type}"
   private_ip = "${var.private_ip}"
