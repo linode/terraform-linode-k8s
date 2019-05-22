@@ -4,7 +4,7 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default = "v1.13.0"
+  default = "v1.13.6"
 }
 
 variable "k8s_feature_gates" {
