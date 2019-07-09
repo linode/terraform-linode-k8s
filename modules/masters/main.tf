@@ -32,7 +32,7 @@ resource "null_resource" "masters_provisioner" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/manifests-tmp/"
+    source      = "${path.cwd}/${path.module}/manifests-tmp/"
     destination = "/home/core/init/"
 
     connection {
@@ -66,7 +66,7 @@ resource "null_resource" "masters_provisioner" {
 }
 
 data "external" "kubeadm_join" {
-  program = ["${path.module}/scripts/local/kubeadm-token.sh"]
+  program = ["${path.cwd}/${path.module}/scripts/local/kubeadm-token.sh"]
 
   query = {
     host = module.master_instance.public_ip_address

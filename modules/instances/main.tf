@@ -46,7 +46,7 @@ resource "linode_instance" "instance" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/scripts/"
+    source      = "${path.cwd}/${path.module}/scripts/"
     destination = "/home/core/init/"
 
     connection {
