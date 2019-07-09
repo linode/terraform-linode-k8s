@@ -1,19 +1,19 @@
 data "linode_instance_type" "master" {
-  id = "${var.server_type_master}"
+  id = var.server_type_master
 }
 
 resource "linode_instance" "k8s_master" {
   count      = 1
-  region     = "${var.region}"
+  region     = var.region
   label      = "${terraform.workspace}-master-${count.index + 1}"
-  group      = "${var.linode_group}"
-  type       = "${var.server_type_master}"
+  group      = var.linode_group
+  type       = var.server_type_master
   private_ip = true
 
   disk {
     label           = "boot"
-    size            = "${data.linode_instance_type.master.disk}"
-    authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
+    size            = data.linode_instance_type.master.disk
+    authorized_keys = [chomp(file(var.ssh_public_key))]
     image           = "linode/containerlinux"
   }
 
@@ -23,29 +23,37 @@ resource "linode_instance" "k8s_master" {
     kernel = "linode/direct-disk"
 
     devices {
-      sda = {
+      sda {
         disk_label = "boot"
       }
     }
   }
 
   provisioner "file" {
-    source      = "${path.module}/scripts/"
+    source      = "${path.cwd}/${path.module}/scripts/"
     destination = "/tmp"
 
     connection {
-      user    = "core"
-      timeout = "300s"
+      host        = self.ip_address
+      agent       = "false"
+      private_key = chomp(file(var.ssh_private_key))
+      type        = "ssh"
+      user        = "core"
+      timeout     = "300s"
     }
   }
 
   provisioner "file" {
-    source      = "${path.module}/manifests-tmp/"
+    source      = "${path.cwd}/${path.module}/manifests-tmp/"
     destination = "/tmp"
 
     connection {
-      user    = "core"
-      timeout = "300s"
+      host        = self.ip_address
+      agent       = "false"
+      private_key = chomp(file(var.ssh_private_key))
+      type        = "ssh"
+      user        = "core"
+      timeout     = "300s"
     }
   }
 
@@ -66,23 +74,28 @@ resource "linode_instance" "k8s_master" {
     ]
 
     connection {
-      user    = "core"
-      timeout = "300s"
+      host        = self.ip_address
+      agent       = "false"
+      private_key = chomp(file(var.ssh_private_key))
+      type        = "ssh"
+      user        = "core"
+      timeout     = "300s"
     }
   }
 
   provisioner "local-exec" {
-    command    = "${path.module}/scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address} ${var.ssh_public_key}"
-    on_failure = "continue"
+    command    = "${path.cwd}/${path.module}/scripts/kubectl-conf.sh ${terraform.workspace} ${self.ip_address} ${self.private_ip_address} ${var.ssh_public_key}"
+    on_failure = continue
   }
 }
 
 data "external" "kubeadm_join" {
-  program = ["${path.module}/scripts/kubeadm-token.sh"]
+  program = ["${path.cwd}/${path.module}/scripts/kubeadm-token.sh"]
 
   query = {
-    host = "${linode_instance.k8s_master.0.ip_address}"
+    host = linode_instance.k8s_master[0].ip_address
   }
 
-  depends_on = ["linode_instance.k8s_master"]
+  depends_on = [linode_instance.k8s_master]
 }
+

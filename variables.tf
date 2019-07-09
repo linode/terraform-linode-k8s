@@ -31,7 +31,7 @@ variable "nodes" {
 }
 
 variable "linode_token" {
-  type        = "string"
+  type        = string
   description = "Linode API v4 Personal Access Token"
 }
 
@@ -40,25 +40,26 @@ variable "linode_group" {
 }
 
 variable "ssh_private_key" {
-  type        = "string"
+  type        = string
   default     = "~/.ssh/id_rsa"
   description = "The path to your private key"
 }
 
 variable "ssh_public_key" {
-  type        = "string"
+  type        = string
   default     = "~/.ssh/id_rsa.pub"
   description = "The path to your public key"
 }
 
 variable "ccm_image" {
-  type        = "string"
+  type        = string
   default     = "linode/linode-cloud-controller-manager:latest"
   description = "The docker repo/image:tag to use for the CCM"
 }
 
 variable "csi_image" {
-  type        = "string"
+  type        = string
   default     = "linode/linode-blockstorage-csi-driver:canary"
   description = "The docker repo/image:tag to use for the CSI"
 }
+
