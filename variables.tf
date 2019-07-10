@@ -39,12 +39,6 @@ variable "linode_group" {
   default = "k8s-terraform"
 }
 
-variable "ssh_private_key" {
-  type        = string
-  default     = "~/.ssh/id_rsa"
-  description = "The path to your private key"
-}
-
 variable "ssh_public_key" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
