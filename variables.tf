@@ -53,12 +53,6 @@ variable "linode_token" {
   description = "Linode API v4 Personal Access Token"
 }
 
-variable "ssh_private_key" {
-  type        = string
-  default     = "~/.ssh/id_rsa"
-  description = "The path to your private key"
-}
-
 variable "ssh_public_key" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
