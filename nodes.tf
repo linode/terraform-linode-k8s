@@ -1,19 +1,19 @@
 data "linode_instance_type" "node" {
-  id = "${var.server_type_node}"
+  id = var.server_type_node
 }
 
 resource "linode_instance" "k8s_node" {
-  count      = "${var.nodes}"
-  region     = "${var.region}"
+  count      = var.nodes
+  region     = var.region
   label      = "${terraform.workspace}-node-${count.index + 1}"
-  group      = "${var.linode_group}"
-  type       = "${var.server_type_node}"
+  group      = var.linode_group
+  type       = var.server_type_node
   private_ip = true
 
   disk {
     label           = "boot"
-    size            = "${data.linode_instance_type.node.disk}"
-    authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
+    size            = data.linode_instance_type.node.disk
+    authorized_keys = [chomp(file(var.ssh_public_key))]
     image           = "linode/containerlinux"
   }
 
@@ -22,19 +22,22 @@ resource "linode_instance" "k8s_node" {
     kernel = "linode/direct-disk"
 
     devices {
-      sda = {
+      sda {
         disk_label = "boot"
       }
     }
   }
 
   provisioner "file" {
-    source      = "${path.module}/scripts/"
+    source      = "${path.cwd}/${path.module}/scripts/"
     destination = "/tmp"
 
     connection {
-      user    = "core"
-      timeout = "300s"
+      host        = self.ip_address
+      agent       = "true"
+      type        = "ssh"
+      user        = "core"
+      timeout     = "300s"
     }
   }
 
@@ -50,8 +53,11 @@ resource "linode_instance" "k8s_node" {
     ]
 
     connection {
-      user    = "core"
-      timeout = "300s"
+      host        = self.ip_address
+      agent       = "true"
+      type        = "ssh"
+      user        = "core"
+      timeout     = "300s"
     }
   }
 
@@ -61,12 +67,15 @@ resource "linode_instance" "k8s_node" {
       "kubectl get pods --all-namespaces",
     ]
 
-    on_failure = "continue"
+    on_failure = continue
 
     connection {
-      user    = "core"
-      timeout = "300s"
-      host    = "${linode_instance.k8s_master.0.ip_address}"
+      host        = self.ip_address
+      agent       = "true"
+      type        = "ssh"
+      user        = "core"
+      timeout     = "300s"
     }
   }
 }
+
