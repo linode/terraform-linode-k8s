@@ -3,7 +3,7 @@
 set -e
 
 # Extract "host" argument from the input into HOST shell variable
-eval "$(python -c 'import sys, json; print("HOST="+json.load(sys.stdin)["host"])')"
+eval "$(python3 -c 'import sys, json; print("HOST="+json.load(sys.stdin)["host"])')"
 
 # TODO: pass the ssh key into this command
 # Fetch the join command
