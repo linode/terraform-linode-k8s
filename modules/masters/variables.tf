@@ -3,6 +3,11 @@ variable "node_count" {
   description = "Number of Kubernetes Control-Plane nodes to provision (max 1)"
 }
 
+variable "master_type" {
+  default     = "master"
+  description = "Node class is determines Kubernetes provisioning behavior (also used as a Linode label prefix)"
+}
+
 variable "node_class" {
   default     = "node"
   description = "Node class is determines Kubernetes provisioning behavior (also used as a Linode label prefix)"
@@ -57,5 +62,9 @@ variable "k8s_feature_gates" {
 }
 
 variable "region" {
+  description = "Linode Region: us-central us-west us-southeast us-east eu-west ap-south eu-central ap-northeast ap-northeast-1a"
+}
+
+variable "lb_ip" {
   description = "Linode Region: us-central us-west us-southeast us-east eu-west ap-south eu-central ap-northeast ap-northeast-1a"
 }

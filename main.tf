@@ -33,6 +33,7 @@ module "masters" {
   ssh_public_key    = "${var.ssh_public_key}"
   region            = "${var.region}"
   linode_group      = "${var.cluster_name}"
+  lb_ip             = "${module.loadbalancer.loadbalancer_ip}"
 
   //todo variable instead of workspace?
   cluster_name = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
@@ -53,6 +54,27 @@ module "nodes" {
   region               = "${var.region}"
   linode_group         = "${var.cluster_name}"
   kubeadm_join_command = "${module.masters.kubeadm_join_command}"
+}
+
+module "loadbalancer" {
+  source = "./modules/loadbalancer"
+  addl_master_count = "${var.addl-masters > 5 ? "5" : var.addl-masters}"
+  cluster_name = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
+  master_ip = "${module.masters.k8s_master_private_ip}"
+  master_label = "${module.masters.label[0]}"
+  label_prefix = "${var.cluster_name == "" ? terraform.workspace : var.cluster_name}"
+  node_class   = "master"
+  node_count   = "${var.addl-masters}"
+  node_type    = "${var.server_type_master}"
+  kubeadm_join_command = "${module.masters.kubeadm_join_command}"
+  kubeadm_cert_key  = "${module.masters.kubeadm_cert_key}"
+  k8s_version       = "${var.k8s_version}"
+  crictl_version    = "${var.crictl_version}"
+  k8s_feature_gates = "${var.k8s_feature_gates}"
+  cni_version       = "${var.cni_version}"
+  ssh_public_key    = "${var.ssh_public_key}"
+  region            = "${var.region}"
+  linode_group      = "${var.cluster_name}"
 }
 
 resource "null_resource" "local_kubectl" {

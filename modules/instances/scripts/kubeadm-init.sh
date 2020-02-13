@@ -3,9 +3,8 @@ set -e
 
 K8S_CLUSTERNAME="$1"
 K8S_VERSION="$2"
-NODE_PRIVATE_IP="$3"
-NODE_PUBLIC_IP="$4"
-K8S_FEATURE_GATES="$5"
+K8S_FEATURE_GATES="$3"
+LOAD_BALANCER_IP="$4"
 POD_NETWORK="10.244.0.0/16"
 
 # Generated with kubeadm config print-default
@@ -21,7 +20,6 @@ apiVersion: kubeadm.k8s.io/v1beta1
 # - authentication
 kind: InitConfiguration
 localAPIEndpoint:
-  advertiseAddress: ${NODE_PUBLIC_IP}
   bindPort: 6443
 nodeRegistration:
   criSocket: /var/run/dockershim.sock
@@ -34,7 +32,7 @@ nodeRegistration:
 ---
 apiServer:
   certSANs:
-  - ${NODE_PRIVATE_IP}
+  - ${LOAD_BALANCER_IP}
   extraArgs:
     cloud-provider: external
     feature-gates: ${K8S_FEATURE_GATES}
@@ -42,7 +40,7 @@ apiServer:
 apiVersion: kubeadm.k8s.io/v1beta1
 certificatesDir: /etc/kubernetes/pki
 clusterName: ${K8S_CLUSTERNAME}
-controlPlaneEndpoint: ""
+controlPlaneEndpoint: "${LOAD_BALANCER_IP}:6443"
 controllerManager:
   extraArgs:
     cloud-provider: external
@@ -100,4 +98,4 @@ resourceContainer: /kube-proxy
 udpIdleTimeout: 250ms
 EOF
 
-kubeadm init --config $HOME/kubeadm-config.yml
+kubeadm init --config $HOME/kubeadm-config.yml --experimental-upload-certs

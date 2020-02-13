@@ -1,13 +1,11 @@
 output "k8s_master_public_ip" {
-  depends_on  = ["module.master_instance"]
-  description = "Public IP Address of the master node"
-  value       = "${module.master_instance.public_ip_address}"
+  depends_on = ["module.master_instance"]
+  value      = "${module.master_instance.master_public_ip}"
 }
 
 output "k8s_master_private_ip" {
-  depends_on  = ["module.master_instance"]
-  description = "Private IP Address of the master node"
-  value       = "${module.master_instance.private_ip_address}"
+  depends_on = ["module.master_instance"]
+  value      = "${module.master_instance.master_private_ip}"
 }
 
 locals {
@@ -20,7 +18,24 @@ locals {
 }
 
 output "kubeadm_join_command" {
-  depends_on  = ["null_resource.masters_provisioner"]
-  description = "kubeadm join command that can be used to add a node to the cluster"
-  value       = "${local.kubeadm_join_command}"
+  depends_on = ["null_resource.masters_provisioner"]
+  value      = "${local.kubeadm_join_command}"
+}
+
+locals {
+  result_key = {
+    command = ""
+  }
+
+  kubeadm_certkey_results = "${concat(data.external.kubeadm_cert_key.*.result, list(local.result_key))}"
+  kubeadm_certkey = "${lookup(local.kubeadm_certkey_results["0"], "cert-key", "")}"
+}
+
+output "kubeadm_cert_key" {
+  depends_on = ["null_resource.masters_provisioner"]
+  value      = "${local.kubeadm_certkey}"
+}
+
+output "label" {
+  value   = "${module.master_instance.label}"
 }

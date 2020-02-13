@@ -1,9 +1,10 @@
-module "node" {
+module "addl-master" {
   source         = "../instances"
   label_prefix   = "${var.label_prefix}"
   node_type      = "${var.node_type}"
   node_count     = "${var.node_count}"
-  node_class     = "node"
+  master_type    = "addl-master"
+  node_class     = "master"
   private_ip     = "true"
   ssh_public_key = "${var.ssh_public_key}"
   region         = "${var.region}"
@@ -16,7 +17,6 @@ module "node" {
   crictl_version    = "${var.crictl_version}"
 }
 
-// todo: does the use of var.kubeadm_join_command (from master output)  queue nodes behind masters? move to parent main.tf if so
 resource "null_resource" "kubeadm_join" {
   count = "${var.node_count}"
 
@@ -24,13 +24,13 @@ resource "null_resource" "kubeadm_join" {
     inline = [
       "set -e",
       "export PATH=$${PATH}:/opt/bin",
-      "sudo ${var.kubeadm_join_command}",
+      "sudo ${var.kubeadm_join_command} --experimental-control-plane --certificate-key ${var.kubeadm_cert_key}",
       "sudo KUBECONFIG=/etc/kubernetes/kubelet.conf kubectl annotate node $${HOSTNAME} --overwrite container-linux-update.v1.coreos.com/reboot-paused=true",
       "chmod +x /home/core/init/end.sh && sudo /home/core/init/end.sh",
     ]
 
     connection {
-      host    = "${element(module.node.instances_public_ip, count.index)}"
+      host    = "${element(module.addl-master.instances_public_ip, count.index)}"
       user    = "core"
       timeout = "300s"
     }

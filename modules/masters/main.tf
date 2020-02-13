@@ -3,6 +3,7 @@ module "master_instance" {
   label_prefix = "${var.label_prefix}"
   node_type    = "${var.node_type}"
   node_count   = "1"                   // HA not supported yet
+  master_type  = "master"
   node_class   = "master"
   linode_group = "${var.linode_group}"
   private_ip   = "true"
@@ -27,7 +28,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
-      host    = "${module.master_instance.public_ip_address}"
+      host    = "${module.master_instance.master_public_ip}"
     }
   }
 
@@ -38,7 +39,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
-      host    = "${module.master_instance.public_ip_address}"
+      host    = "${module.master_instance.master_public_ip}"
     }
   }
 
@@ -46,7 +47,7 @@ resource "null_resource" "masters_provisioner" {
     # TODO advertise on public adress
     inline = [
       "set -e",
-      "chmod +x /home/core/init/kubeadm-init.sh && sudo /home/core/init/kubeadm-init.sh ${var.cluster_name} ${var.k8s_version} ${module.master_instance.public_ip_address} ${module.master_instance.private_ip_address} ${var.k8s_feature_gates}",
+      "chmod +x /home/core/init/kubeadm-init.sh && sudo /home/core/init/kubeadm-init.sh ${var.cluster_name} ${var.k8s_version} ${var.k8s_feature_gates} ${var.lb_ip}",
       "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown core $HOME/.kube/config",
       "export PATH=$${PATH}:/opt/bin",
       "kubectl apply -f /home/core/init/calico.yaml",
@@ -60,7 +61,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
-      host    = "${module.master_instance.public_ip_address}"
+      host    = "${module.master_instance.master_public_ip}"
     }
   }
 }
@@ -69,7 +70,17 @@ data "external" "kubeadm_join" {
   program = ["${path.module}/scripts/local/kubeadm-token.sh"]
 
   query = {
-    host = "${module.master_instance.public_ip_address}"
+    host = "${module.master_instance.master_public_ip}"
+  }
+
+  depends_on = ["null_resource.masters_provisioner"]
+}
+
+data "external" "kubeadm_cert_key" {
+  program = ["${path.module}/scripts/local/kubeadm-certkey.sh"]
+
+  query = {
+    host = "${module.master_instance.master_public_ip}"
   }
 
   depends_on = ["null_resource.masters_provisioner"]
