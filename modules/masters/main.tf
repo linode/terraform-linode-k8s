@@ -1,23 +1,23 @@
 module "master_instance" {
   source       = "../instances"
-  label_prefix = "${var.label_prefix}"
-  node_type    = "${var.node_type}"
+  label_prefix = var.label_prefix
+  node_type    = var.node_type
   node_count   = "1"                   // HA not supported yet
   node_class   = "master"
-  linode_group = "${var.linode_group}"
+  linode_group = var.linode_group
   private_ip   = "true"
   use_public   = "true"                // rename this var, sent to kubeadm
 
-  k8s_version       = "${var.k8s_version}"
-  k8s_feature_gates = "${var.k8s_feature_gates}"
-  cni_version       = "${var.cni_version}"
-  crictl_version    = "${var.crictl_version}"
-  ssh_public_key    = "${var.ssh_public_key}"
-  region            = "${var.region}"
+  k8s_version       = var.k8s_version
+  k8s_feature_gates = var.k8s_feature_gates
+  cni_version       = var.cni_version
+  crictl_version    = var.crictl_version
+  ssh_public_key    = var.ssh_public_key
+  region            = var.region
 }
 
 resource "null_resource" "masters_provisioner" {
-  depends_on = ["module.master_instance"]
+  depends_on = [module.master_instance]
 
   provisioner "remote-exec" {
     inline = [
@@ -27,7 +27,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
-      host    = "${module.master_instance.public_ip_address}"
+      host    = module.master_instance.public_ip_address
     }
   }
 
@@ -38,7 +38,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
-      host    = "${module.master_instance.public_ip_address}"
+      host    = module.master_instance.public_ip_address
     }
   }
 
@@ -60,7 +60,7 @@ resource "null_resource" "masters_provisioner" {
     connection {
       user    = "core"
       timeout = "300s"
-      host    = "${module.master_instance.public_ip_address}"
+      host    = module.master_instance.public_ip_address
     }
   }
 }
@@ -69,8 +69,8 @@ data "external" "kubeadm_join" {
   program = ["${path.module}/scripts/local/kubeadm-token.sh"]
 
   query = {
-    host = "${module.master_instance.public_ip_address}"
+    host = module.master_instance.public_ip_address
   }
 
-  depends_on = ["null_resource.masters_provisioner"]
+  depends_on = [null_resource.masters_provisioner]
 }
