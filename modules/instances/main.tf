@@ -1,29 +1,33 @@
+locals {
+  root_user = "core"
+}
+
 data "linode_instance_type" "type" {
-  id = "${var.node_type}"
+  id = var.node_type
 }
 
 resource "linode_instance" "instance" {
-  count      = "${var.node_count}"
-  region     = "${var.region}"
+  count      = var.node_count
+  region     = var.region
   label      = "${var.label_prefix == "" ? "" : "${var.label_prefix}-"}${var.node_class}-${count.index + 1}"
-  group      = "${var.linode_group}"
-  type       = "${var.node_type}"
-  private_ip = "${var.private_ip}"
+  group      = var.linode_group
+  type       = var.node_type
+  private_ip = var.private_ip
 
   disk {
     label           = "boot"
-    size            = "${data.linode_instance_type.type.disk}"
-    authorized_keys = ["${chomp(file(var.ssh_public_key))}"]
+    size            = data.linode_instance_type.type.disk
+    authorized_keys = [chomp(file(var.ssh_public_key))]
     image           = "linode/containerlinux"
   }
 
   config {
-    label = "${var.node_class}"
+    label = var.node_class
 
     kernel = "linode/direct-disk"
 
     devices {
-      sda = {
+      sda {
         disk_label = "boot"
       }
     }
@@ -35,7 +39,8 @@ resource "linode_instance" "instance" {
     ]
 
     connection {
-      user    = "core"
+      host    = self.ip_address
+      user    = local.root_user
       timeout = "300s"
     }
   }
@@ -45,7 +50,8 @@ resource "linode_instance" "instance" {
     destination = "/home/core/init/"
 
     connection {
-      user    = "core"
+      host    = self.ip_address
+      user    = local.root_user
       timeout = "300s"
     }
   }
@@ -59,7 +65,8 @@ resource "linode_instance" "instance" {
     ]
 
     connection {
-      user    = "core"
+      host    = self.ip_address
+      user    = local.root_user
       timeout = "300s"
     }
   }

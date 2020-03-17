@@ -49,24 +49,24 @@ variable "cluster_name" {
 }
 
 variable "linode_token" {
-  type        = "string"
+  type        = string
   description = "Linode API v4 Personal Access Token"
 }
 
 variable "ssh_private_key" {
-  type        = "string"
+  type        = string
   default     = "~/.ssh/id_rsa"
   description = "The path to your private key"
 }
 
 variable "ssh_public_key" {
-  type        = "string"
+  type        = string
   default     = "~/.ssh/id_rsa.pub"
   description = "The path to your public key"
 }
 
 variable "update_agent_reboot_paused" {
-  type        = "string"
+  type        = string
   default     = "true"
   description = "Pause the container-linux update-agent operator from triggering reboots.  Defaults to 'true' (Paused) to prevent the control-plane from rebooting in the first few minutes of the cluster's life-cycle."
 }

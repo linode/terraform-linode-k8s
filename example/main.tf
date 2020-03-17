@@ -18,8 +18,8 @@ module "linode_k8s" {
 
   version = "0.1.0"
 
-  nodes        = "${var.nodes}"
-  linode_token = "${var.linode_token}"
+  nodes        = var.nodes
+  linode_token = var.linode_token
 }
 
 variable "nodes" {
@@ -35,7 +35,7 @@ variable "linode_domain" {
 }
 
 provider "kubernetes" {
-  config_path = "${module.linode_k8s.kubectl_config}"
+  config_path = module.linode_k8s.kubectl_config
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -46,7 +46,7 @@ resource "kubernetes_service_account" "tiller" {
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
-  depends_on = ["kubernetes_service_account.tiller"]
+  depends_on = [kubernetes_service_account.tiller]
 
   metadata {
     name = "tiller"
@@ -65,11 +65,11 @@ resource "kubernetes_cluster_role_binding" "tiller" {
 }
 
 resource null_resource "tiller" {
-  depends_on = ["kubernetes_cluster_role_binding.tiller"]
+  depends_on = [kubernetes_cluster_role_binding.tiller]
 
   provisioner "local-exec" {
     environment {
-      KUBECONFIG = "${module.linode_k8s.kubectl_config}"
+      KUBECONFIG = module.linode_k8s.kubectl_config
     }
 
     command = "helm init --service-account tiller --wait"
@@ -82,7 +82,7 @@ provider "helm" {
   install_tiller  = false
 
   kubernetes {
-    config_path = "${module.linode_k8s.kubectl_config}"
+    config_path = module.linode_k8s.kubectl_config
   }
 }
 
@@ -92,7 +92,7 @@ resource "helm_repository" "incubator" {
 }
 
 resource "helm_release" "wordpress" {
-  depends_on = ["helm_release.mysqlha"]
+  depends_on = [helm_release.mysqlha]
   name       = "stable"
   chart      = "wordpress"
   version    = "5.0.1"
@@ -105,7 +105,7 @@ resource "helm_release" "wordpress" {
 }
 
 resource "helm_release" "mysqlha" {
-  name    = "${helm_repository.incubator.name}"
+  name    = helm_repository.incubator.name
   chart   = "mysqlha"
   version = "0.4.0"
   values  = ["${file("${path.module}/values/mysqlha.values.yaml")}"]
@@ -121,7 +121,7 @@ resource "helm_release" "traefik" {
     name  = "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname\\.io/hostname"
     value = "dashboard.${var.linode_domain}"
   }
-
+  
   set {
     name  = "dashboard.domain"
     value = "dashboard.${var.linode_domain}"
