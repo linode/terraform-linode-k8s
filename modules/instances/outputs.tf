@@ -13,7 +13,7 @@ output "private_ip_address" {
 }
 
 output "nodes_public_ip" {
-  depends_on  = [linode_instance.instance[0], linode_instance.instance[1], linode_instance.instance[2]]
+  depends_on  = [linode_instance.instance]
   description = "Public IP Address of the instance(s)"
   value       = concat(linode_instance.instance.*.ip_address)
 }

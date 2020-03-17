@@ -39,7 +39,7 @@ resource "linode_instance" "instance" {
     ]
 
     connection {
-      host    = linode_instance.instance[count.index].ip_address
+      host    = self.ip_address
       user    = local.root_user
       timeout = "300s"
     }
@@ -50,7 +50,7 @@ resource "linode_instance" "instance" {
     destination = "/home/core/init/"
 
     connection {
-      host    = linode_instance.instance[count.index].ip_address
+      host    = self.ip_address
       user    = local.root_user
       timeout = "300s"
     }
@@ -65,7 +65,7 @@ resource "linode_instance" "instance" {
     ]
 
     connection {
-      host    = linode_instance.instance[count.index].ip_address
+      host    = self.ip_address
       user    = local.root_user
       timeout = "300s"
     }
