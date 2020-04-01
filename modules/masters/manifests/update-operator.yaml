@@ -5,13 +5,18 @@ metadata:
   name: reboot-coordinator
 ---
 # xref: https://raw.githubusercontent.com/coreos/container-linux-update-operator/master/examples/deploy/update-operator.yaml
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: container-linux-update-operator
   namespace: reboot-coordinator
+  labels:
+    app: container-linux-update-operator
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: container-linux-update-operator
   template:
     metadata:
       labels:
@@ -33,7 +38,7 @@ spec:
         effect: NoSchedule
 ---
 # xref: https://raw.githubusercontent.com/coreos/container-linux-update-operator/master/examples/deploy/update-agent.yaml
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: container-linux-update-agent
@@ -43,6 +48,9 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: container-linux-update-agent
   template:
     metadata:
       labels:
