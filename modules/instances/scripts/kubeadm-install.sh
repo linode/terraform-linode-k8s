@@ -28,6 +28,19 @@ do
   sleep 1
 done
 
+# Configure Docker to use systemd for cgroup driver
+mkdir -p /etc/docker
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
 mkdir -p /etc/kubernetes/manifests
 
 mkdir -p /opt/cni/bin
@@ -45,5 +58,7 @@ curl -sSL 2>/dev/null "https://raw.githubusercontent.com/kubernetes/kubernetes/$
 mkdir -p /etc/systemd/system/kubelet.service.d
 curl -sSL 2>/dev/null "https://raw.githubusercontent.com/kubernetes/kubernetes/${K8S_VERSION}/build/debs/10-kubeadm.conf" | sed "s:/usr/bin:/opt/bin:g" > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
+systemctl enable docker.service
+systemctl start docker.service
 systemctl enable kubelet.service
 systemctl start kubelet.service
