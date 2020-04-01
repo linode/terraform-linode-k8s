@@ -4,7 +4,7 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default     = "v1.14.0"
+  default     = "v1.17.0"
   description = "Kubernetes version to install"
 }
 
