@@ -121,7 +121,7 @@ resource "helm_release" "traefik" {
     name  = "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname\\.io/hostname"
     value = "dashboard.${var.linode_domain}"
   }
-  
+
   set {
     name  = "dashboard.domain"
     value = "dashboard.${var.linode_domain}"
