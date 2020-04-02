@@ -1,22 +1,41 @@
-version: 2
-jobs:
-  build:
-    branches:
-      only:
-        - master
+version: 2.1
+
+executors:
+  terraform:
     docker:
-      - image: alpine:latest
+      - image: hashicorp/terraform:0.12.24
+
+jobs:
+  check:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: lint
+          command: make lint
+  integration-test:
+    executor: terraform
     steps:
       - run: apk add --update --no-cache make ca-certificates openssh-keygen openssh-client bash python
-      - run: mkdir -p /opt/bin && ln -s /opt/bin/terraform /usr/bin/terraform && ln -s /opt/bin/kubectl /usr/bin/kubectl
-      - run: wget https://releases.hashicorp.com/terraform/0.12.23/terraform_0.12.23_linux_amd64.zip -O /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
       - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /opt/bin/kubectl && chmod +x /opt/bin/kubectl
-      - run: ssh-keygen  -q -t rsa -N '' -f $HOME/.ssh/id_rsa
       - checkout
       - add_ssh_keys
       - run: ssh-add $HOME/.ssh/id_rsa
-      - run: make test
       - run:
-          name: Cleanup Failed Test
+          name: integration test
+          command: make test
+      - run:
+          name: failure cleanup
           command: make destroy
           when: on_fail
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - check
+      - integration-test:
+          filters:
+            branches:
+              only:
+                - master
