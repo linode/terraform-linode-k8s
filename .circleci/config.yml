@@ -5,10 +5,17 @@ executors:
     docker:
       - image: hashicorp/terraform:0.12.24
 
+commands:
+  install_build_deps:
+    description: install all builds deps
+    steps:
+      - run: apk add --update --no-cache make ca-certificates openssh-keygen openssh-client bash python
+
 jobs:
   check:
     executor: terraform
     steps:
+      - install_build_deps
       - checkout
       - run:
           name: lint
@@ -16,7 +23,7 @@ jobs:
   integration-test:
     executor: terraform
     steps:
-      - run: apk add --update --no-cache make ca-certificates openssh-keygen openssh-client bash python
+      - install_build_deps
       - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /opt/bin/kubectl && chmod +x /opt/bin/kubectl
       - checkout
       - add_ssh_keys
@@ -37,5 +44,4 @@ workflows:
       - integration-test:
           filters:
             branches:
-              only:
-                - master
+              only: master
