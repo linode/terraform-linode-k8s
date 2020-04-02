@@ -2,11 +2,11 @@ module "master_instance" {
   source       = "../instances"
   label_prefix = var.label_prefix
   node_type    = var.node_type
-  node_count   = "1"                   // HA not supported yet
+  node_count   = "1" // HA not supported yet
   node_class   = "master"
   linode_group = var.linode_group
   private_ip   = "true"
-  use_public   = "true"                // rename this var, sent to kubeadm
+  use_public   = "true" // rename this var, sent to kubeadm
 
   k8s_version       = var.k8s_version
   k8s_feature_gates = var.k8s_feature_gates

@@ -11,6 +11,9 @@ TF_VAR_linode_token = ${LINODE_TOKEN}
 init:
 	terraform init
 
+lint:
+	terraform fmt -recursive -check -diff .
+
 plan:
 	terraform plan
 
@@ -20,4 +23,4 @@ apply:
 destroy:
 	terraform destroy -auto-approve
 
-test: init plan apply destroy
+test: lint init plan apply destroy
