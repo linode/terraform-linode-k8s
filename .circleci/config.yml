@@ -25,9 +25,9 @@ jobs:
     steps:
       - install_build_deps
       - checkout
-      - run: ssh-keygen -b 4096 -t rsa -f $HOME/.ssh/id_rsa -q -N ""
-      - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
+      - run: echo -e 'y\n' | ssh-keygen -b 4096 -f $HOME/.ssh/id_rsa -t rsa -N ''
       - run: ssh-add $HOME/.ssh/id_rsa
+      - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
       - run:
           name: integration test
           command: make test
