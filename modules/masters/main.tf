@@ -54,6 +54,7 @@ resource "null_resource" "masters_provisioner" {
       "chmod +x /home/core/init/monitoring-install.sh && /home/core/init/monitoring-install.sh",
       "chmod +x /home/core/init/update-operator.sh && /home/core/init/update-operator.sh",
       "kubectl annotate node $${HOSTNAME} --overwrite container-linux-update.v1.coreos.com/reboot-paused=true",
+      "chmod +x /home/core/init/ingress-install.sh && /home/core/init/ingress-install.sh",
       "chmod +x /home/core/init/end.sh && sudo /home/core/init/end.sh",
     ]
 
