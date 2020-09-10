@@ -1,6 +1,6 @@
 # Linode Addons Examples
 
-This directory contains simple helm scripts to confirm the the various Linode Addons are working.
+This directory contains simple helm scripts to confirm the various Linode Addons are working.
 
 ## How the Linode addons are used
 
