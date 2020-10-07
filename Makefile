@@ -14,13 +14,19 @@ init:
 lint:
 	terraform fmt -recursive -check -diff .
 
-plan:
+plan: check-token
 	terraform plan
 
-apply:
+apply: check-token
 	terraform apply -auto-approve
 
-destroy:
+destroy: check-token
 	terraform destroy -auto-approve
 
 test: lint init plan apply destroy
+
+check-token:
+	@if test "$(LINODE_TOKEN)" = "" ; then \
+	  echo "LINODE_TOKEN must be set"; \
+	  exit 1; \
+	fi
