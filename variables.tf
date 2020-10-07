@@ -73,6 +73,6 @@ variable "ccm_image" {
 
 variable "csi_image" {
   type        = "string"
-  default     = "linode/linode-blockstorage-csi-driver:canary"
+  default     = "linode/linode-blockstorage-csi-driver:latest"
   description = "The docker repo/image:tag to use for the CSI"
 }
