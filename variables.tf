@@ -66,13 +66,13 @@ variable "update_agent_reboot_paused" {
 }
 
 variable "ccm_image" {
-  type        = "string"
+  type        = string
   default     = "linode/linode-cloud-controller-manager:latest"
   description = "The docker repo/image:tag to use for the CCM"
 }
 
 variable "csi_image" {
-  type        = "string"
+  type        = string
   default     = "linode/linode-blockstorage-csi-driver:latest"
   description = "The docker repo/image:tag to use for the CSI"
 }
