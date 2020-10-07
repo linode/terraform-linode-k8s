@@ -16,12 +16,7 @@ CCM_IMAGE=$1
 CSI_IMAGE=$2
 
 # substitute Docker images in manifests
-rm -rf manifests-tmp
-cp -r manifests manifests-tmp
 
-cp manifests-tmp/ccm-linode.yaml manifests-tmp/ccm-linode.yaml.tmp
-sed -e "s|{{ \.Values\.CCMImage }}|${CCM_IMAGE}|g" manifests-tmp/ccm-linode.yaml.tmp > manifests-tmp/ccm-linode.yaml
-
-cp manifests-tmp/csi-linode.yaml manifests-tmp/csi-linode.yaml.tmp
-sed -e "s|{{ \.Values\.CSIImage }}|${CSI_IMAGE}|g" manifests-tmp/csi-linode.yaml.tmp > manifests-tmp/csi-linode.yaml
+sed -e "s|{{ \.Values\.CCMImage }}|${CCM_IMAGE}|g" modules/masters/templates/ccm-linode.yaml.template > modules/masters/manifests/ccm-linode.yaml
+sed -e "s|{{ \.Values\.CSIImage }}|${CSI_IMAGE}|g" modules/masters/templates/csi-linode.yaml.template > modules/masters/manifests/csi-linode.yaml
 
