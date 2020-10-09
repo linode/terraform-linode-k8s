@@ -14,7 +14,7 @@ variable "crictl_version" {
 }
 
 variable "k8s_feature_gates" {
-  default     = "CSINodeInfo=true,CSIDriverRegistry=true,BlockVolume=true,CSIBlockVolume=true"
+  default     = ""
   description = "Feature gates to enable in the Kubelet and API server"
 }
 
@@ -53,12 +53,6 @@ variable "linode_token" {
   description = "Linode API v4 Personal Access Token"
 }
 
-variable "ssh_private_key" {
-  type        = string
-  default     = "~/.ssh/id_rsa"
-  description = "The path to your private key"
-}
-
 variable "ssh_public_key" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
@@ -69,4 +63,16 @@ variable "update_agent_reboot_paused" {
   type        = string
   default     = "true"
   description = "Pause the container-linux update-agent operator from triggering reboots.  Defaults to 'true' (Paused) to prevent the control-plane from rebooting in the first few minutes of the cluster's life-cycle."
+}
+
+variable "ccm_image" {
+  type        = string
+  default     = "linode/linode-cloud-controller-manager:latest"
+  description = "The docker repo/image:tag to use for the CCM"
+}
+
+variable "csi_image" {
+  type        = string
+  default     = "linode/linode-blockstorage-csi-driver:latest"
+  description = "The docker repo/image:tag to use for the CSI"
 }

@@ -5,7 +5,8 @@ resource "null_resource" "preflight-checks" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/local/preflight.sh"
+    command     = "${path.cwd}/${path.module}/scripts/local/preflight.sh ${var.ccm_image} ${var.csi_image}"
+    working_dir = "${path.cwd}/${path.module}"
   }
 }
 
@@ -51,7 +52,7 @@ resource "null_resource" "local_kubectl" {
   depends_on = [module.masters]
 
   provisioner "local-exec" {
-    command    = "${path.module}/scripts/local/kubectl-conf.sh ${terraform.workspace} ${module.masters.k8s_master_public_ip} ${module.masters.k8s_master_private_ip} ${var.ssh_public_key}"
+    command    = "${path.cwd}/${path.module}/scripts/local/kubectl-conf.sh ${terraform.workspace} ${module.masters.k8s_master_public_ip} ${module.masters.k8s_master_private_ip} ${var.ssh_public_key}"
     on_failure = continue
   }
 }
