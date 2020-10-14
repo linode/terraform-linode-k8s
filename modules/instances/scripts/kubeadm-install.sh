@@ -9,7 +9,7 @@ NODE_IP=$5
 K8S_FEATURE_GATES="$6"
 
 cat << EOF > /etc/default/kubelet
-KUBELET_EXTRA_ARGS="--cloud-provider=external --allow-privileged=true --feature-gates=${K8S_FEATURE_GATES}"
+KUBELET_EXTRA_ARGS="--cloud-provider=external --feature-gates=${K8S_FEATURE_GATES}"
 EOF
 
 # enable ipvs

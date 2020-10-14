@@ -11,6 +11,7 @@ Cluster size and instance types are configurable through Terraform variables.
 ### Prerequisites
 
 * Terraform must be installed
+* Bash must be installed
 * SSH should be installed and configured with an SSH Key and Agent (Recommended)
 * Having kubectl installed is recommended
 
@@ -145,7 +146,7 @@ kubectl -n kube-system describe secrets `kubectl -n kube-system get secrets | aw
 
 A primary function of the CCM is to register and maintain Kubernetes `LoadBalancer` settings within a Linode [`NodeBalancer`](https://www.linode.com/nodebalancers).  This is needed to allow traffic from the Internet into the cluster in the most fault tollerant way (obviously very important!)
 
-The CCM also annotates new Kubernetes Nodes with Linode specific details, including the LinodeID and instance type.  Linode hostnames and network addresses are automatically associated with their corresponding Kubernetes resources, forming the basis for a variety of Kubernetes features.  T
+The CCM also annotates new Kubernetes Nodes with Linode specific details, including the LinodeID and instance type.  Linode hostnames and network addresses are automatically associated with their corresponding Kubernetes resources, forming the basis for a variety of Kubernetes features.
 
 The CCM monitors the Linode API for changes in the Linode instance and will remove a Kubernetes Node if it finds the Linode has been deleted.  Resources will automatically be re-scheduled if the Linode is powered off.
 

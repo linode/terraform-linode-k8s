@@ -1,15 +1,47 @@
-version: 2
-jobs:
-  build:
-    branches:
-      only:
-        - master
+version: 2.1
+
+executors:
+  terraform:
     docker:
-      - image: alpine:latest
+      - image: hashicorp/terraform:0.12.24
+
+commands:
+  install_build_deps:
+    description: install all builds deps
     steps:
-      - run: apk add --update --no-cache make ca-certificates openssh-keygen openssh-client
-      - run: mkdir -p /opt/bin && ln -s /opt/bin/terraform /usr/bin/terraform
-      - run: wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip -O /tmp/terraform.zip && unzip /tmp/terraform.zip -d /opt/bin && chmod +x /opt/bin/terraform
-      - run: ssh-keygen  -q -t rsa -N '' -f $HOME/.ssh/id_rsa
+      - run: apk add --update --no-cache make ca-certificates openssh-keygen openssh-client bash python
+
+jobs:
+  check:
+    executor: terraform
+    steps:
+      - install_build_deps
       - checkout
-      - run: make test
+      - run:
+          name: lint
+          command: make lint
+  integration-test:
+    executor: terraform
+    steps:
+      - install_build_deps
+      - checkout
+      - run: echo -e 'y\n' | ssh-keygen -b 4096 -f $HOME/.ssh/id_rsa -t rsa -N ''
+      - run: ssh-add $HOME/.ssh/id_rsa
+      - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
+      - run:
+          name: integration test
+          command: make test
+      - run:
+          name: failure cleanup
+          command: make destroy
+          when: on_fail
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - check
+      - integration-test:
+          filters:
+            branches:
+              only: master

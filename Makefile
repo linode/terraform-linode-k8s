@@ -1,22 +1,32 @@
 .PHONY: init plan apply destroy test
 
-export TF_INPUT=0
-export TF_WORKSPACE=testing
-export TF_IN_AUTOMATION=1
+.EXPORT_ALL_VARIABLES:
 
-export TF_VAR_nodes=1
-export TF_VAR_linode_token=$$LINODE_TOKEN
+TF_INPUT = 0
+TF_WORKSPACE = testing
+TF_IN_AUTOMATION = 1
+TF_VAR_nodes = 1
+TF_VAR_linode_token = ${LINODE_TOKEN}
 
 init:
 	terraform init
 
-plan:
+lint:
+	terraform fmt -recursive -check -diff .
+
+plan: check-token
 	terraform plan
 
-apply:
+apply: check-token
 	terraform apply -auto-approve
 
-destroy:
+destroy: check-token
 	terraform destroy -auto-approve
 
-test: init plan apply destroy
+test: lint init plan apply destroy
+
+check-token:
+	@if test "$(LINODE_TOKEN)" = "" ; then \
+	  echo "LINODE_TOKEN must be set"; \
+	  exit 1; \
+	fi
