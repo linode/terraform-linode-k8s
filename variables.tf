@@ -14,7 +14,7 @@ variable "crictl_version" {
 }
 
 variable "k8s_feature_gates" {
-  default     = ""
+  default     = "ExpandCSIVolumes=true"
   description = "Feature gates to enable in the Kubelet and API server"
 }
 
