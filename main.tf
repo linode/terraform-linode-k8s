@@ -5,7 +5,7 @@ resource "null_resource" "preflight-checks" {
   }
 
   provisioner "local-exec" {
-    command     = "${path.cwd}/${path.module}/scripts/local/preflight.sh ${var.ccm_image} ${var.csi_image}"
+    command     = "${path.cwd}/${path.module}/scripts/local/preflight.sh \"${var.ccm_image}\" \"${var.csi_manifest}\""
     working_dir = "${path.cwd}/${path.module}"
   }
 }

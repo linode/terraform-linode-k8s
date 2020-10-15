@@ -4,12 +4,12 @@ variable "cni_version" {
 }
 
 variable "k8s_version" {
-  default     = "v1.14.0"
+  default     = "v1.15.12"
   description = "Kubernetes version to install"
 }
 
 variable "crictl_version" {
-  default     = "v1.14.0"
+  default     = "v1.15.0"
   description = "Container Runtime Interface version to install"
 }
 
@@ -71,8 +71,8 @@ variable "ccm_image" {
   description = "The docker repo/image:tag to use for the CCM"
 }
 
-variable "csi_image" {
+variable "csi_manifest" {
   type        = string
-  default     = "linode/linode-blockstorage-csi-driver:latest"
-  description = "The docker repo/image:tag to use for the CSI"
+  default     = "https://raw.githubusercontent.com/linode/linode-blockstorage-csi-driver/master/pkg/linode-bs/deploy/releases/linode-blockstorage-csi-driver-v0.1.7.yaml"
+  description = "The linode csi manifest location"
 }
