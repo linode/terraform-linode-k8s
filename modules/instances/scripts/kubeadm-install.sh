@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -o nounset -o errexit
+set -o nounset -o errexit -o pipefail
 
 K8S_VERSION=$1
 CNI_VERSION=$2
