@@ -62,6 +62,7 @@ spec:
           name: ccm-linode
           args:
           - --cloud-provider=linode
+          - --leader-elect-resource-lock=endpoints
           - --v=3
           volumeMounts:
           - mountPath: /etc/kubernetes
