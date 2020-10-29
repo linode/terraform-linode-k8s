@@ -1,3 +1,3 @@
-## CoreOS Kubernetes Nodes Instances
+## Ubuntu Kubernetes Nodes Instances
 
-This module provisions a Kubernetes Node Linode Instance using CoreOS.
+This module provisions a Kubernetes Node Linode Instance using Ubuntu.

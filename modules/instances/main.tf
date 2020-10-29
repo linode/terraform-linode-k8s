@@ -1,9 +1,11 @@
 locals {
-  root_user = "core"
-}
+  root_user = "root"
 
-data "linode_instance_type" "type" {
-  id = var.node_type
+  ubuntu_images = {
+    "16.04" : "linode/ubuntu16.04lts",
+    "18.04" : "linode/ubuntu18.04",
+    "20.04" : "linode/ubuntu20.04",
+  }
 }
 
 resource "linode_instance" "instance" {
@@ -14,28 +16,12 @@ resource "linode_instance" "instance" {
   type       = var.node_type
   private_ip = var.private_ip
 
-  disk {
-    label           = "boot"
-    size            = data.linode_instance_type.type.disk
-    authorized_keys = [chomp(file(var.ssh_public_key))]
-    image           = "linode/containerlinux"
-  }
-
-  config {
-    label = var.node_class
-
-    kernel = "linode/direct-disk"
-
-    devices {
-      sda {
-        disk_label = "boot"
-      }
-    }
-  }
+  authorized_keys = [chomp(file(var.ssh_public_key))]
+  image           = local.ubuntu_images[var.ubuntu_version]
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/init/",
+      "mkdir -p /root/init/",
     ]
 
     connection {
@@ -47,7 +33,7 @@ resource "linode_instance" "instance" {
 
   provisioner "file" {
     source      = "${path.cwd}/${path.module}/scripts/"
-    destination = "/home/core/init/"
+    destination = "/root/init/"
 
     connection {
       host    = self.ip_address
@@ -59,9 +45,9 @@ resource "linode_instance" "instance" {
   provisioner "remote-exec" {
     inline = [
       "set -e",
-      "chmod +x /home/core/init/start.sh && sudo /home/core/init/start.sh",
-      "chmod +x /home/core/init/linode-network.sh && sudo /home/core/init/linode-network.sh ${self.private_ip_address} ${self.label}",
-      "chmod +x /home/core/init/kubeadm-install.sh && sudo /home/core/init/kubeadm-install.sh \"${var.k8s_version}\" \"${var.cni_version}\" \"${var.crictl_version}\" \"${self.label}\" \"${var.use_public ? self.ip_address : self.private_ip_address}\" \"${var.k8s_feature_gates}\"",
+      "chmod +x /root/init/start.sh && sudo /root/init/start.sh",
+      "chmod +x /root/init/linode-network.sh && sudo /root/init/linode-network.sh ${self.private_ip_address} ${self.label}",
+      "chmod +x /root/init/kubeadm-install.sh && sudo /root/init/kubeadm-install.sh \"${var.k8s_version}\" \"${var.cni_version}\" \"${var.crictl_version}\" \"${self.label}\" \"${var.use_public ? self.ip_address : self.private_ip_address}\" \"${var.k8s_feature_gates}\"",
     ]
 
     connection {

@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/linode/terraform-linode-k8s.svg?style=svg)](https://circleci.com/gh/linode/terraform-linode-k8s)
 
-This Terraform module creates a Kubernetes v1.15.12 Cluster on Linode Cloud infrastructure using the ContainerLinux operating system.  The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
+This Terraform module creates a Kubernetes v1.15.12 Cluster on Linode Cloud infrastructure running Ubuntu 20.04. The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
 
 Cluster size and instance types are configurable through Terraform variables.
 
@@ -72,19 +72,18 @@ terraform apply \
 
 This will do the following:
 
-* provisions Linode Instances in parallel with CoreOS ContainerLinux (the Linode instance type/size of the `master` and the `node` may be different)
-* connects to the Linode Instances via SSH and installs kubeadm, kubectl, and other Kubernetes binaries to /opt/bin
+* provisions Linode Instances in parallel with Ubuntu 20.04 (the Linode instance type/size of the `master` and the `node` may be different)
+* connects to the Linode Instances via SSH and installs various Kubernetes components and supporting binaries: [kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/), [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/), [kubelet](https://kubernetes.io/docs/concepts/overview/components/#kubelet), [kubernetes-cni](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#cni), and [crictl](https://kubernetes.io/docs/tasks/debug-application-cluster/crictl/).
 * installs a Calico network between Linode Instances
 * runs kubeadm init on the master server and configures kubectl
 * joins the nodes in the cluster using the kubeadm token obtained from the master
   * installs Linode add-ons:
-    * [CSI](https://github.com/linode/linode-blockstorage-csi-driver/) (LinodeBlock Storage Volumes)
+    * [CSI](https://github.com/linode/linode-blockstorage-csi-driver) (LinodeBlock Storage Volumes)
     * [CCM](https://github.com/linode/linode-cloud-controller-manager) (Linode NodeBalancers)
     * [External-DNS](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/linode.md) (Linode Domains)
   * installs cluster add-ons:
-    * Kubernetes dashboard
-    * metrics server
-    * [Container Linux Update Operator](https://github.com/coreos/container-linux-update-operator)
+    * [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
+    * [Metrics Server](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/#metrics-server)
 * copies the kubectl admin config file for local `kubectl` use via the public IP of the API server
 
 A full list of the supported variables are available in the [Terraform Module Registry](https://registry.terraform.io/modules/linode/k8s/linode/?tab=inputs).
@@ -170,18 +169,6 @@ As configured in this Terraform module, any service or ingress with a specific a
 
 [Learn more at the External-DNS Github project.](https://github.com/kubernetes-incubator/external-dns)
 
-### [**Container Linux Update Operator**](https://github.com/coreos/container-linux-update-operator/)
-
-The Update Operator deploys an agent to all of the nodes (include the master) which will schedule Container Linux reboots when an update has been prepared.  The Update Operator prevents multiple nodes from rebooting at the same time.  Cordone and drain commands are sent to the nodes before rebooting.  **System update reboots are paused by default** to prevent new clusters from rebooting in the first five minutes of their life-cycle which could have an adverse effect on the Terraform provisioning process.
-
-Set the `update_agent_reboot_paused` variable using the `-var` argument, `TF_VAR_update_agent_reboot_paused` environment variable, or by creating a `update_agent.tfvars` file with the following contents:
-
-```
-update_agent_reboot_paused = "false"
-```
-
-In practice, rebooted nodes will be unavailable for a minute or two once the reboot has started.  Take advantage of the Linode Block Storage CSI driver so Persistent Volumes can be rescheduled with workloads to the available nodes.
-
 ## Development
 
 To make changes to this project, verify that you have the prerequisites and then clone the repo.  Instead of using the Terraform `module` syntax, and being confined by the variables that are provided, you'll be able to make any changes necessary.
@@ -201,7 +188,7 @@ terraform init --from-module=linode/k8s/linode linode-k8s
 
 This terraform modules is composed of three sub-modules for reuse and separation of concerns.
 
-* Instance - Accepts all necessary Linode Instance provisioning variables and performs CoreOS Container Linux common tasks for the Linode environment.
+* Instance - Provisions a base Linode Instance for the cluster.
 * Master - Uses the Instance module as a base and futher provisions a Kubernetes control-plane.
 * Node - Uses the Instance module as a base and further provisions a Kubernetes worker joined to a control-plane using module parameters.
 

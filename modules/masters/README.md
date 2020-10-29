@@ -1,3 +1,3 @@
-## CoreOS Kubernetes Master Instances
+## Ubuntu Kubernetes Master Instances
 
-This module provisions a Kubernetes Master Linode Instance using CoreOS.
+This module provisions a Kubernetes Master Linode Instance using Ubuntu.

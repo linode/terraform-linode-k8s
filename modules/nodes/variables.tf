@@ -1,3 +1,8 @@
+variable "ubuntu_version" {
+  description = "Ubuntu version to install"
+  default     = "20.04"
+}
+
 variable "node_count" {
   default     = "1"
   description = "Number of Kubernetes Nodes to provision"
@@ -37,7 +42,7 @@ variable "region" {
 }
 
 variable "ssh_public_key" {
-  description = "SSH keys authorized for the Linux user account (core on Container Linux, root otherwise)"
+  description = "SSH keys authorized for the root user account"
 }
 
 variable "k8s_version" {

@@ -10,6 +10,7 @@ module "node" {
 
   linode_group = var.linode_group
 
+  ubuntu_version    = var.ubuntu_version
   k8s_version       = var.k8s_version
   k8s_feature_gates = var.k8s_feature_gates
   cni_version       = var.cni_version
@@ -25,13 +26,12 @@ resource "null_resource" "kubeadm_join" {
       "set -e",
       "export PATH=$${PATH}:/opt/bin",
       "sudo ${var.kubeadm_join_command}",
-      "sudo KUBECONFIG=/etc/kubernetes/kubelet.conf kubectl annotate node $${HOSTNAME} --overwrite container-linux-update.v1.coreos.com/reboot-paused=true",
-      "chmod +x /home/core/init/end.sh && sudo /home/core/init/end.sh",
+      "chmod +x /root/init/end.sh && sudo /root/init/end.sh",
     ]
 
     connection {
       host    = element(module.node.nodes_public_ip, count.index)
-      user    = "core"
+      user    = "root"
       timeout = "300s"
     }
   }

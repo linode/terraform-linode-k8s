@@ -54,3 +54,13 @@ variable "crictl_version" {
 variable "k8s_feature_gates" {
   description = "Feature gates to enable in the Kubelet and API server"
 }
+
+variable "ubuntu_version" {
+  description = "Ubuntu version to install"
+  default     = "16.04"
+
+  validation {
+    condition     = contains(["16.04", "18.04", "20.04"], var.ubuntu_version)
+    error_message = "Ubuntu version must be one of supported: 16.04, 18.04, or 20.04."
+  }
+}

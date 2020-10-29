@@ -21,6 +21,9 @@ jobs:
           name: lint
           command: make lint
   integration-test:
+    parameters:
+      ubuntu_version:
+        type: string
     executor: terraform
     steps:
       - install_build_deps
@@ -30,10 +33,10 @@ jobs:
       - run: wget https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
       - run:
           name: integration test
-          command: make test
+          command: TF_VAR_cluster_name=test<< parameters.ubuntu_version >> TF_VAR_ubuntu_version=<< parameters.ubuntu_version >> make test
       - run:
           name: failure cleanup
-          command: make destroy
+          command: TF_VAR_cluster_name=test<< parameters.ubuntu_version >> TF_VAR_ubuntu_version=<< parameters.ubuntu_version >> make destroy
           when: on_fail
 
 workflows:
@@ -42,6 +45,9 @@ workflows:
     jobs:
       - check
       - integration-test:
+          matrix:
+            parameters:
+              ubuntu_version: ['16.04', '18.04', '20.04']
           filters:
             branches:
               only: master
