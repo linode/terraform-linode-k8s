@@ -15,6 +15,7 @@ module "master_instance" {
   crictl_version    = var.crictl_version
   ssh_public_key    = var.ssh_public_key
   region            = var.region
+  docker_version    = var.docker_version
 }
 
 resource "null_resource" "masters_provisioner" {

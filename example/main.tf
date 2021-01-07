@@ -64,7 +64,7 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   }
 }
 
-resource null_resource "tiller" {
+resource "null_resource" "tiller" {
   depends_on = [kubernetes_cluster_role_binding.tiller]
 
   provisioner "local-exec" {

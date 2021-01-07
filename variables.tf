@@ -4,12 +4,12 @@ variable "ubuntu_version" {
 }
 
 variable "cni_version" {
-  default     = "v0.7.5"
+  default     = "v0.8.7"
   description = "Container Network Plugin Version"
 }
 
 variable "k8s_version" {
-  default     = "v1.15.12"
+  default     = "v1.18.13"
   description = "Kubernetes version to install"
 }
 
@@ -19,7 +19,7 @@ variable "crictl_version" {
 }
 
 variable "k8s_feature_gates" {
-  default     = "ExpandCSIVolumes=true"
+  default     = ""
   description = "Feature gates to enable in the Kubelet and API server"
 }
 
@@ -74,4 +74,16 @@ variable "csi_manifest" {
   type        = string
   default     = "https://raw.githubusercontent.com/linode/linode-blockstorage-csi-driver/master/pkg/linode-bs/deploy/releases/linode-blockstorage-csi-driver-v0.1.7.yaml"
   description = "The linode csi manifest location"
+}
+
+variable "calico_manifest" {
+  type        = string
+  default     = "https://docs.projectcalico.org/manifests/calico.yaml"
+  description = "The calico manifest location"
+}
+
+variable "docker_version" {
+  type        = string
+  default     = "19.03"
+  description = "The docker version to install"
 }

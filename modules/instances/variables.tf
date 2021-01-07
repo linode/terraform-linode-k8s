@@ -64,3 +64,7 @@ variable "ubuntu_version" {
     error_message = "Ubuntu version must be one of supported: 16.04, 18.04, or 20.04."
   }
 }
+
+variable "docker_version" {
+  description = "The docker version to install"
+}

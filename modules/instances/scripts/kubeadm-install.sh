@@ -7,23 +7,13 @@ CRICTL_VERSION="$3"
 HOSTNAME=$4
 NODE_IP=$5
 K8S_FEATURE_GATES="$6"
+DOCKER_VERSION=$7
 
 get_latest_pkg_revision() {
   local pkg="$1"
   local filter="$2"
 
   version=`apt list -a $pkg | grep "$filter" | head -1 | awk '{print $2}'`
-  echo $version
-}
-
-get_docker_version() {
-  local semver=(${K8S_VERSION//./ })
-  local minor_version=${semver[1]}
-  local version=18.09
-
-  if (( $minor_version >= 17 )); then
-    version=19.03
-  fi
   echo $version
 }
 
@@ -56,7 +46,8 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sudo sysctl --system
 
-# install latest docker daemon
+# install docker daemon
+sudo apt-get update
 sudo apt-get -y install apt-transport-https curl ca-certificates gnupg-agent software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository \
@@ -64,8 +55,7 @@ sudo add-apt-repository \
    $(lsb_release -cs) \
    stable"
 
-docker_version=$(get_docker_version)
-docker_release=$(get_latest_pkg_revision docker-ce $docker_version)
+docker_release=$(get_latest_pkg_revision docker-ce $DOCKER_VERSION)
 
 sudo apt-get update
 sudo apt-get install -y \
@@ -112,3 +102,5 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 systemctl enable kubelet.service
 systemctl start kubelet.service
+
+echo 'successfully installed kubeadm'

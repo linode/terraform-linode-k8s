@@ -5,7 +5,7 @@ resource "null_resource" "preflight-checks" {
   }
 
   provisioner "local-exec" {
-    command     = "${path.cwd}/${path.module}/scripts/local/preflight.sh \"${var.ccm_image}\" \"${var.csi_manifest}\""
+    command     = "${path.cwd}/${path.module}/scripts/local/preflight.sh \"${var.ccm_image}\" \"${var.csi_manifest}\" \"${var.calico_manifest}\""
     working_dir = "${path.cwd}/${path.module}"
   }
 }
@@ -19,6 +19,7 @@ module "masters" {
   linode_token = var.linode_token
 
   ubuntu_version    = var.ubuntu_version
+  docker_version    = var.docker_version
   k8s_version       = var.k8s_version
   crictl_version    = var.crictl_version
   k8s_feature_gates = var.k8s_feature_gates
@@ -39,6 +40,7 @@ module "nodes" {
   node_type    = var.server_type_node
 
   ubuntu_version       = var.ubuntu_version
+  docker_version       = var.docker_version
   k8s_version          = var.k8s_version
   crictl_version       = var.crictl_version
   k8s_feature_gates    = var.k8s_feature_gates
