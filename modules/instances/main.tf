@@ -47,7 +47,7 @@ resource "linode_instance" "instance" {
       "set -e",
       "chmod +x /root/init/start.sh && sudo /root/init/start.sh",
       "chmod +x /root/init/linode-network.sh && sudo /root/init/linode-network.sh ${self.private_ip_address} ${self.label}",
-      "chmod +x /root/init/kubeadm-install.sh && sudo /root/init/kubeadm-install.sh \"${var.k8s_version}\" \"${var.cni_version}\" \"${var.crictl_version}\" \"${self.label}\" \"${var.use_public ? self.ip_address : self.private_ip_address}\" \"${var.k8s_feature_gates}\"",
+      "chmod +x /root/init/kubeadm-install.sh && sudo /root/init/kubeadm-install.sh \"${var.k8s_version}\" \"${var.cni_version}\" \"${var.crictl_version}\" \"${self.label}\" \"${var.use_public ? self.ip_address : self.private_ip_address}\" \"${var.k8s_feature_gates}\" \"${var.docker_version}\"",
     ]
 
     connection {

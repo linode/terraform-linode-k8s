@@ -64,3 +64,7 @@ variable "k8s_feature_gates" {
 variable "region" {
   description = "Linode Region: us-central us-west us-southeast us-east eu-west ap-south eu-central ap-northeast ap-northeast-1a"
 }
+
+variable "docker_version" {
+  description = "The docker version to install"
+}

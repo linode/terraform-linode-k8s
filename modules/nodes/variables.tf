@@ -60,3 +60,7 @@ variable "crictl_version" {
 variable "k8s_feature_gates" {
   description = "Kubernetes Feature gates to enable in the Kubelet"
 }
+
+variable "docker_version" {
+  description = "The docker version to install"
+}

@@ -6,6 +6,15 @@ This Terraform module creates a Kubernetes v1.15.12 Cluster on Linode Cloud infr
 
 Cluster size and instance types are configurable through Terraform variables.
 
+## Validated configurations
+
+k8s_version|docker_version|cni_version|crictl_version|k8s_feature_gates
+---|---|---|---|---
+v1.19.6|19.03|v0.8.7|v1.15.0|
+v1.18.13|19.03|v0.8.7|v1.15.0|
+v1.17.16|19.03|v0.8.7|v1.15.0|
+v1.16.15|19.03|v0.8.7|v1.15.0|
+
 ## Install
 
 ### Prerequisites
