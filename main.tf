@@ -1,3 +1,7 @@
+provider "linode" {
+  token = var.linode_token
+}
+
 resource "null_resource" "preflight-checks" {
   # Force re-run
   triggers = {
