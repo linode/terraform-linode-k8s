@@ -1,8 +1,6 @@
 # Kubernetes Terraform installer for Linode Instances
 
-[![CircleCI](https://circleci.com/gh/linode/terraform-linode-k8s.svg?style=svg)](https://circleci.com/gh/linode/terraform-linode-k8s)
-
-This Terraform module creates a Kubernetes v1.15.12 Cluster on Linode Cloud infrastructure running Ubuntu 20.04. The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
+This Terraform module creates a Kubernetes Cluster on Linode Cloud infrastructure running Ubuntu. The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
 
 Cluster size and instance types are configurable through Terraform variables.
 
