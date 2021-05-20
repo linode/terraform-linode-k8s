@@ -1,5 +1,9 @@
 # Kubernetes Terraform installer for Linode Instances
 
+:warning: | This project is experimental and should not be used in production environments.
+:---: | :---
+
+
 This Terraform module creates a Kubernetes Cluster on Linode Cloud infrastructure running Ubuntu. The cluster is designed to take advantage of the Linode regional private network, and is equiped with Linode specific cluster enhancements.
 
 Cluster size and instance types are configurable through Terraform variables.
